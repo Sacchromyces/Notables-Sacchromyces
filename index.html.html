@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Music Player</title>
+
+  <!-- Favicon and PWA manifest -->
+  <!-- Make sure these files are in the root of your repo -->
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
+
+  <style>
+    body { font-family: sans-serif; background: #111; color: #eee; text-align: center; }
+    h1 { margin-bottom: 10px; }
+
+    #albums { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
+    .album, .home-square { width: 200px; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+    .album img, .home-square img { width: 200px; height: 200px; object-fit: cover; border-radius: 10px; border: 2px solid #555; margin-bottom: 10px; transition: transform 0.2s; }
+    .album img:hover, .home-square img:hover { transform: scale(1.05); }
+    .album-title { font-weight: bold; margin-bottom: 5px; }
+
+    #playlist button {
+      margin: 5px; padding: 10px 15px; background: #222; border: 1px solid #555; color: #eee;
+      cursor: pointer; border-radius: 5px; display: block; width: 220px; margin-left: auto; margin-right: auto; transition: background 0.2s;
+    }
+    #playlist button:hover { background: #444; }
+
+    #controls { margin-top: 20px; display: flex; justify-content: center; gap: 30px; }
+    .control-btn {
+      background: #333; border: 1px solid #555; color: #eee; border-radius: 50%;
+      width: 50px; height: 50px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .control-btn:hover { background: #555; transform: scale(1.1); }
+
+    #nowPlaying { margin-top: 15px; font-weight: bold; }
+    audio { margin-top: 20px; width: 80%; }
+  </style>
+</head>
+<body>
+
+<h1>Music Player</h1>
+
+<div id="albums"></div>
+
+<h2 id="albumTitle"></h2>
+
+<div id="playlist"></div>
+
+<div id="controls">
+  <button id="prev" class="control-btn">&#9664;</button>
+  <button id="play" class="control-btn">&#9654;</button>
+  <button id="next" class="control-btn">&#9654;&#9654;</button>
+</div>
+
+<audio id="player" controls>
+  <source id="source" src="" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+
+<p id="nowPlaying">Now Playing: None</p>
+
+<script>
+  // --- IMAGE NOTES ---
+  // Place these images in the same folder as index.html or update the paths accordingly:
+  // Vessel cover image: Vessel.jpg
+  // Blurryface cover image: Blurryface.jpg
+  // Home square image: Home.jpg
+  // Album song files should be in the same folder or update the 'file' path if in a subfolder
+
+  const albums = {
+    "Vessel": { 
+      cover: "Vessel.jpg", // Album cover
+      songs: [
+        { file: "Ode_to_Sleep.mp3", title: "Ode to Sleep" },
+        { file: "Migraine.mp3", title: "Migraine" },
+        { file: "House_of_Gold.mp3", title: "House of Gold" },
+        { file: "Car_Radio.mp3", title: "Car Radio" },
+        { file: "Semi_Automatic.mp3", title: "Semi-Automatic" },
+        { file: "Screen.mp3", title: "Screen" },
+        { file: "The_Run_and_Go.mp3", title: "The Run and Go" },
+        { file: "Fake_You_Out.mp3", title: "Fake You Out" },
+        { file: "Guns_for_Hands.mp3", title: "Guns for Hands" },
+        { file: "Truce.mp3", title: "Truce" },
+        { file: "Addict_with_a_Pen.mp3", title: "Addict with a Pen" },
+        { file: "Lovely.mp3", title: "Lovely" },
+        { file: "Blasphemy.mp3", title: "Blasphemy" },
+        { file: "Holding_on_to_you.mp3", title: "Holding on to You" }
+      ]
+    },
+    "Blurryface": {
+      cover: "Blurryface.jpg", // Album cover
+      songs: [
+        { file: "StressedOut.mp3", title: "Stressed Out" },
+        { file: "Ride.mp3", title: "Ride" },
+        { file: "Fairly_Local.mp3", title: "Fairly Local" },
+        { file: "Tear_in_My_Heart.mp3", title: "Tear in My Heart" },
+        { file: "Lane_Boy.mp3", title: "Lane Boy" },
+        { file: "The_Judge.mp3", title: "The Judge" },
+        { file: "Doubt.mp3", title: "Doubt" },
+        { file: "Polarize.mp3", title: "Polarize" },
+        { file: "We_Dont_Believe_Whats_On_TV.mp3", title: "We Don't Believe What's on TV" },
+        { file: "Message_Man.mp3", title: "Message Man" },
+        { file: "Hometown.mp3", title: "Hometown" },
+        { file: "Not_Today.mp3", title: "Not Today" },
+        { file: "Goner.mp3", title: "Goner" }
+      ]
+    }
+  };
+
+  let currentAlbum = null;
+  let currentSong = 0;
+  let lastAlbum = null;
+
+  const player = document.getElementById("player");
+  const source = document.getElementById("source");
+  const nowPlaying = document.getElementById("nowPlaying");
+  const albumTitle = document.getElementById("albumTitle");
+  const albumsDiv = document.getElementById("albums");
+  const playlistDiv = document.getElementById("playlist");
+  const playBtn = document.getElementById("play");
+
+  // ... rest of your JS remains unchanged ...
+
+  // HOME SQUARE IMAGE
+  const homeSquare = document.createElement("div");
+  homeSquare.className = "home-square";
+  homeSquare.innerHTML = `
+    <img src="Home.jpg" alt="Home"> <!-- Home image -->
+    <div class="album-title">Home</div>
+  `;
+  homeSquare.addEventListener("click", () => {
+    playlistDiv.innerHTML = "";
+    albumTitle.textContent = "";
+    currentAlbum = null;
+    currentSong = 0;
+  });
+  albumsDiv.appendChild(homeSquare);
+
+  // Album squares with cover images
+  Object.keys(albums).forEach(name => {
+    const albumDiv = document.createElement("div");
+    albumDiv.className = "album";
+    albumDiv.innerHTML = `
+      <img src="${albums[name].cover}" alt="${name}"> <!-- Album cover image -->
+      <div class="album-title">${name}</div>
+    `;
+    albumDiv.addEventListener("click", () => loadAlbum(name));
+    albumsDiv.appendChild(albumDiv);
+  });
+
+  // --- SERVICE WORKER REGISTRATION ---
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(reg => console.log('Service Worker registered', reg))
+      .catch(err => console.error('Service Worker registration failed', err));
+  }
+</script>
+
+</body>
+</html>
