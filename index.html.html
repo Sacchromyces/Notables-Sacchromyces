@@ -5,7 +5,6 @@
   <title>Music Player</title>
 
   <!-- Favicon and PWA manifest -->
-  <!-- Make sure these files are in the root of your repo -->
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -45,9 +44,7 @@
 <h1>Music Player</h1>
 
 <div id="albums"></div>
-
 <h2 id="albumTitle"></h2>
-
 <div id="playlist"></div>
 
 <div id="controls">
@@ -64,16 +61,10 @@
 <p id="nowPlaying">Now Playing: None</p>
 
 <script>
-  // --- IMAGE NOTES ---
-  // Place these images in the same folder as index.html or update the paths accordingly:
-  // Vessel cover image: Vessel.jpg
-  // Blurryface cover image: Blurryface.jpg
-  // Home square image: Home.jpg
-  // Album song files should be in the same folder or update the 'file' path if in a subfolder
-
+  // --- Albums and song files ---
   const albums = {
     "Vessel": { 
-      cover: "Vessel.jpg", // Album cover
+      cover: "Vessel.jpg",
       songs: [
         { file: "Ode_to_Sleep.mp3", title: "Ode to Sleep" },
         { file: "Migraine.mp3", title: "Migraine" },
@@ -92,7 +83,7 @@
       ]
     },
     "Blurryface": {
-      cover: "Blurryface.jpg", // Album cover
+      cover: "Blurryface.jpg",
       songs: [
         { file: "StressedOut.mp3", title: "Stressed Out" },
         { file: "Ride.mp3", title: "Ride" },
@@ -123,13 +114,40 @@
   const playlistDiv = document.getElementById("playlist");
   const playBtn = document.getElementById("play");
 
-  // ... rest of your JS remains unchanged ...
+  // --- FUNCTIONS ---
+  function loadAlbum(name) {
+    currentAlbum = name;
+    lastAlbum = name;
+    currentSong = 0;
+    albumTitle.textContent = name + " Album";
+    playlistDiv.innerHTML = "";
 
-  // HOME SQUARE IMAGE
+    albums[name].songs.forEach((song, index) => {
+      const btn = document.createElement("button");
+      btn.textContent = song.title;
+      btn.addEventListener("click", () => playSong(index));
+      playlistDiv.appendChild(btn);
+    });
+
+    playSong(0);
+  }
+
+  function playSong(index) {
+    if (!currentAlbum) return;
+    currentSong = index;
+    const song = albums[currentAlbum].songs[currentSong];
+    source.src = song.file;
+    player.load();
+    player.play();
+    playBtn.innerHTML = "&#10074;&#10074;";
+    nowPlaying.textContent = "Now Playing: " + song.title;
+  }
+
+  // --- HOME SQUARE ---
   const homeSquare = document.createElement("div");
   homeSquare.className = "home-square";
   homeSquare.innerHTML = `
-    <img src="Home.jpg" alt="Home"> <!-- Home image -->
+    <img src="Home.jpg" alt="Home">
     <div class="album-title">Home</div>
   `;
   homeSquare.addEventListener("click", () => {
@@ -140,19 +158,52 @@
   });
   albumsDiv.appendChild(homeSquare);
 
-  // Album squares with cover images
+  // --- ALBUM SQUARES ---
   Object.keys(albums).forEach(name => {
     const albumDiv = document.createElement("div");
     albumDiv.className = "album";
     albumDiv.innerHTML = `
-      <img src="${albums[name].cover}" alt="${name}"> <!-- Album cover image -->
+      <img src="${albums[name].cover}" alt="${name}">
       <div class="album-title">${name}</div>
     `;
     albumDiv.addEventListener("click", () => loadAlbum(name));
     albumsDiv.appendChild(albumDiv);
   });
 
-  // --- SERVICE WORKER REGISTRATION ---
+  // --- CONTROL BUTTONS ---
+  playBtn.addEventListener("click", () => {
+    if (player.paused) {
+      player.play();
+      playBtn.innerHTML = "&#10074;&#10074;";
+    } else {
+      player.pause();
+      playBtn.innerHTML = "&#9654;";
+    }
+  });
+
+  document.getElementById("next").addEventListener("click", () => {
+    if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
+    currentSong++;
+    if (currentSong >= albums[currentAlbum].songs.length) currentSong = 0;
+    playSong(currentSong);
+  });
+
+  document.getElementById("prev").addEventListener("click", () => {
+    if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
+    currentSong--;
+    if (currentSong < 0) currentSong = albums[currentAlbum].songs.length - 1;
+    playSong(currentSong);
+  });
+
+  player.addEventListener("pause", () => { playBtn.innerHTML = "&#9654;"; });
+  player.addEventListener("play", () => { playBtn.innerHTML = "&#10074;&#10074;"; });
+  player.addEventListener("ended", () => {
+    currentSong++;
+    if (currentSong >= albums[currentAlbum].songs.length) currentSong = 0;
+    playSong(currentSong);
+  });
+
+  // --- SERVICE WORKER ---
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js')
       .then(reg => console.log('Service Worker registered', reg))
