@@ -12,7 +12,7 @@
   <meta name="theme-color" content="#000000">
 
   <style>
-    body { font-family: sans-serif; background: #111; color: #eee; text-align: center; }
+    body { font-family: sans-serif; background: #111; color: #eee; text-align: center; margin:0; padding:20px; }
     h1 { margin-bottom: 10px; }
 
     #albums { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
@@ -21,13 +21,15 @@
     .album img:hover, .home-square img:hover { transform: scale(1.05); }
     .album-title { font-weight: bold; margin-bottom: 5px; }
 
+    #playerArea { margin-top: 10px; } /* wrapper for controls, audio and playlist */
+
     #playlist button {
       margin: 5px; padding: 10px 15px; background: #222; border: 1px solid #555; color: #eee;
       cursor: pointer; border-radius: 5px; display: block; width: 220px; margin-left: auto; margin-right: auto; transition: background 0.2s;
     }
     #playlist button:hover { background: #444; }
 
-    #controls { margin-top: 20px; display: flex; justify-content: center; gap: 30px; }
+    #controls { margin-top: 10px; display: flex; justify-content: center; gap: 30px; }
     .control-btn {
       background: #333; border: 1px solid #555; color: #eee; border-radius: 50%;
       width: 50px; height: 50px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -36,31 +38,53 @@
     .control-btn:hover { background: #555; transform: scale(1.1); }
 
     #nowPlaying { margin-top: 15px; font-weight: bold; }
-    audio { margin-top: 20px; width: 80%; }
+
+    /* Audio player styling (keeps native progress bar visible) */
+    audio {
+      margin-top: 12px;
+      width: 95%;
+      max-width: 1000px;
+      outline: none;
+      background: #222;
+      color: #eee;
+    }
+
+    /* small responsiveness */
+    @media (max-width: 480px) {
+      .album, .home-square { width: 45vw; }
+      .album img, .home-square img { width: 100%; height: auto; }
+      #playlist button { width: 85%; }
+    }
   </style>
 </head>
 <body>
 
 <h1>Music Player</h1>
 
+<!-- album tiles -->
 <div id="albums"></div>
 
+<!-- album title (keeps above controls) -->
 <h2 id="albumTitle"></h2>
 
-<div id="playlist"></div>
+<!-- Player area: controls, native audio (progress bar), nowPlaying, then playlist (so playlist is always below) -->
+<div id="playerArea">
+  <div id="controls">
+    <button id="prev" class="control-btn" title="Previous">&#9664;</button>
+    <button id="play" class="control-btn" title="Play/Pause">&#9654;</button>
+    <button id="next" class="control-btn" title="Next">&#9654;&#9654;</button>
+  </div>
 
-<div id="controls">
-  <button id="prev" class="control-btn">&#9664;</button>
-  <button id="play" class="control-btn">&#9654;</button>
-  <button id="next" class="control-btn">&#9654;&#9654;</button>
+  <audio id="player" controls>
+    <source id="source" src="" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <p id="nowPlaying">Now Playing: None</p>
+
+  <!-- PLAYLIST IS HERE: it will be filled under the progress bar -->
+  <div id="playlist"></div>
 </div>
-
-<audio id="player" controls>
-  <source id="source" src="" type="audio/mpeg">
-  Your browser does not support the audio element.
-</audio>
-
-<p id="nowPlaying">Now Playing: None</p>
 
 <script>
   // --- Albums and songs ---
@@ -104,9 +128,9 @@
     }
   };
 
-  let currentAlbum = null;
+  let currentAlbum = null; // album currently loaded into UI (if any)
   let currentSong = 0;
-  let lastAlbum = null;
+  let lastAlbum = null;    // last known album used for fallback
 
   const player = document.getElementById("player");
   const source = document.getElementById("source");
@@ -116,52 +140,115 @@
   const playlistDiv = document.getElementById("playlist");
   const playBtn = document.getElementById("play");
 
-  // --- Functions ---
+  // media session helper (optional)
   function updateMediaSession(song) {
-    if ('mediaSession' in navigator) {
+    if ('mediaSession' in navigator && currentAlbum) {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: song.title,
         artist: currentAlbum,
         album: currentAlbum,
         artwork: [{ src: albums[currentAlbum].cover, sizes: '300x300', type: 'image/jpeg' }]
       });
-
       navigator.mediaSession.setActionHandler('play', () => player.play());
       navigator.mediaSession.setActionHandler('pause', () => player.pause());
-      navigator.mediaSession.setActionHandler('previoustrack', () => document.getElementById("prev").click());
-      navigator.mediaSession.setActionHandler('nexttrack', () => document.getElementById("next").click());
+      navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+      navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
     }
   }
 
+  // loadAlbum: shows playlist under player (only called when user clicks an album)
   function loadAlbum(name) {
     currentAlbum = name;
     lastAlbum = name;
     currentSong = 0;
     albumTitle.textContent = name + " Album";
+
     playlistDiv.innerHTML = "";
     albums[name].songs.forEach((song, index) => {
       const btn = document.createElement("button");
       btn.textContent = song.title;
-      btn.addEventListener("click", () => playSong(index));
+      btn.addEventListener("click", () => {
+        playSong(index); // safe — currentAlbum is set
+      });
       playlistDiv.appendChild(btn);
     });
-    playSong(0);
+
+    // optional: scroll player into view so playlist is visible
+    // document.getElementById('playerArea').scrollIntoView({ behavior: 'smooth' });
   }
 
+  // playSong: plays an index in the current album (or fallback to lastAlbum)
   function playSong(index) {
-    if (!currentAlbum && !lastAlbum) return;
-    if (!currentAlbum) currentAlbum = lastAlbum;
+    // Choose album to use
+    if (!currentAlbum && lastAlbum) {
+      currentAlbum = lastAlbum;
+    }
+    if (!currentAlbum) return; // nothing to play
+
+    // clamp index
+    const songs = albums[currentAlbum].songs;
+    if (index < 0 || index >= songs.length) return;
+
     currentSong = index;
-    const song = albums[currentAlbum].songs[currentSong];
+    const song = songs[currentSong];
     source.src = song.file;
     player.load();
-    player.play();
+    player.play().catch(err => console.log("Autoplay prevented:", err));
     playBtn.innerHTML = "&#10074;&#10074;";
     nowPlaying.textContent = "Now Playing: " + song.title;
     updateMediaSession(song);
   }
 
-  // --- Home square ---
+  // This plays a random song from a given album WITHOUT rendering the playlist UI.
+  // Used by the Home Play button so we stay in "home mode".
+  function playRandomSongSilent(albumName) {
+    if (!albums[albumName]) return;
+    currentAlbum = albumName;
+    lastAlbum = albumName;
+    const songIndex = Math.floor(Math.random() * albums[albumName].songs.length);
+    currentSong = songIndex;
+    const song = albums[albumName].songs[currentSong];
+    source.src = song.file;
+    player.load();
+    player.play().catch(err => console.log("Autoplay prevented:", err));
+    playBtn.innerHTML = "&#10074;&#10074;";
+    nowPlaying.textContent = "Now Playing: " + song.title;
+    // NOTE: do not call loadAlbum() here — that would render playlist
+    updateMediaSession(song);
+  }
+
+  // helper: plays a random album and shows its playlist (if you need it)
+  function playRandomAlbumAndShow() {
+    const albumNames = Object.keys(albums);
+    const randomAlbum = albumNames[Math.floor(Math.random() * albumNames.length)];
+    loadAlbum(randomAlbum);
+    const songIndex = Math.floor(Math.random() * albums[randomAlbum].songs.length);
+    playSong(songIndex);
+  }
+
+  // Next/Prev actions (safe fallbacks)
+  function nextTrack() {
+    // ensure we have an album to reference
+    if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
+    if (!currentAlbum) return;
+
+    currentSong++;
+    const songs = albums[currentAlbum].songs;
+    if (currentSong >= songs.length) currentSong = 0;
+    playSong(currentSong);
+  }
+
+  function prevTrack() {
+    if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
+    if (!currentAlbum) return;
+
+    currentSong--;
+    const songs = albums[currentAlbum].songs;
+    if (currentSong < 0) currentSong = songs.length - 1;
+    playSong(currentSong);
+  }
+
+  // --- Home square (visual clear only; does NOT stop playback) ---
   const homeSquare = document.createElement("div");
   homeSquare.className = "home-square";
   homeSquare.innerHTML = `
@@ -171,12 +258,11 @@
   homeSquare.addEventListener("click", () => {
     playlistDiv.innerHTML = "";
     albumTitle.textContent = "";
-    currentAlbum = null;
-    currentSong = 0;
+    // important: do NOT reset currentAlbum/currentSong or stop the player
   });
   albumsDiv.appendChild(homeSquare);
 
-  // --- Album squares ---
+  // create album tiles
   Object.keys(albums).forEach(name => {
     const albumDiv = document.createElement("div");
     albumDiv.className = "album";
@@ -184,39 +270,53 @@
       <img src="${albums[name].cover}" alt="${name}">
       <div class="album-title">${name}</div>
     `;
-    albumDiv.addEventListener("click", () => loadAlbum(name));
+    // clicking an album loads its playlist and starts the first track
+    albumDiv.addEventListener("click", () => {
+      loadAlbum(name);
+      albumDiv.addEventListener("click", () => {
+  loadAlbum(name);
+  // Removed playSong(0) so music continues playing
+});
+
+    });
     albumsDiv.appendChild(albumDiv);
   });
 
-  // --- Controls ---
+  // Controls wiring
   playBtn.addEventListener("click", () => {
-    if(player.paused) { player.play(); playBtn.innerHTML = "&#10074;&#10074;"; }
-    else { player.pause(); playBtn.innerHTML = "&#9654;"; }
+    if (player.paused) {
+      // if no album has been selected via the UI, play a random song silently (don't show playlist)
+      if (!currentAlbum && !lastAlbum) {
+        const albumNames = Object.keys(albums);
+        const randomAlbum = albumNames[Math.floor(Math.random() * albumNames.length)];
+        playRandomSongSilent(randomAlbum);
+      } else {
+        // if an album exists (either via lastAlbum/currentAlbum), just resume
+        player.play();
+      }
+      playBtn.innerHTML = "&#10074;&#10074;";
+    } else {
+      player.pause();
+      playBtn.innerHTML = "&#9654;";
+    }
   });
 
-  document.getElementById("next").addEventListener("click", () => {
-    if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
-    currentSong++;
-    if(currentSong >= albums[currentAlbum].songs.length) currentSong = 0;
-    playSong(currentSong);
-  });
+  document.getElementById("next").addEventListener("click", nextTrack);
+  document.getElementById("prev").addEventListener("click", prevTrack);
 
-  document.getElementById("prev").addEventListener("click", () => {
-    if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
-    currentSong--;
-    if(currentSong < 0) currentSong = albums[currentAlbum].songs.length - 1;
-    playSong(currentSong);
-  });
-
+  // Keep the play/pause UI in sync with native player events
   player.addEventListener("pause", () => playBtn.innerHTML = "&#9654;");
   player.addEventListener("play", () => playBtn.innerHTML = "&#10074;&#10074;");
   player.addEventListener("ended", () => {
+    // default: move to next track in the current/last album
+    if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
+    if (!currentAlbum) return;
     currentSong++;
-    if(currentSong >= albums[currentAlbum].songs.length) currentSong = 0;
+    if (currentSong >= albums[currentAlbum].songs.length) currentSong = 0;
     playSong(currentSong);
   });
 
-  // --- Service Worker ---
+  // --- Service Worker (optional) ---
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js')
       .then(reg => console.log('Service Worker registered', reg))
@@ -226,4 +326,3 @@
 
 </body>
 </html>
-
