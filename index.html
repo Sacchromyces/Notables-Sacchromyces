@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Music Player</title>
 
   <!-- Favicon and PWA manifest -->
@@ -35,14 +35,7 @@
     }
     .control-btn:hover { background: #555; transform: scale(1.1); }
     #nowPlaying { margin-top: 15px; font-weight: bold; }
-    audio {
-      margin-top: 12px;
-      width: 95%;
-      max-width: 1000px;
-      outline: none;
-      background: #222;
-      color: #eee;
-    }
+    audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; background: #222; color: #eee; }
 
     /* --- Mobile / Enhanced Layout --- */
     @media (max-width: 480px) {
@@ -64,13 +57,9 @@
 
 <h1>Music Player</h1>
 
-<!-- album tiles -->
 <div id="albums"></div>
-
-<!-- album title (keeps above controls) -->
 <h2 id="albumTitle"></h2>
 
-<!-- Player area: controls, native audio (progress bar), nowPlaying, then playlist (so playlist is always below) -->
 <div id="playerArea">
   <div id="controls">
     <button id="prev" class="control-btn" title="Previous">&#9664;</button>
@@ -84,13 +73,10 @@
   </audio>
 
   <p id="nowPlaying">Now Playing: None</p>
-
-  <!-- PLAYLIST IS HERE: it will be filled under the progress bar -->
   <div id="playlist"></div>
 </div>
 
 <script>
-  // --- Albums and songs ---
   const albums = {
     "Vessel": { 
       cover: "Vessel.jpg",
@@ -131,10 +117,7 @@
     }
   };
 
-  let currentAlbum = null; // album currently loaded into UI (if any)
-  let currentSong = 0;
-  let lastAlbum = null;    // last known album used for fallback
-
+  let currentAlbum = null, currentSong = 0, lastAlbum = null;
   const player = document.getElementById("player");
   const source = document.getElementById("source");
   const nowPlaying = document.getElementById("nowPlaying");
@@ -143,7 +126,6 @@
   const playlistDiv = document.getElementById("playlist");
   const playBtn = document.getElementById("play");
 
-  // media session helper (optional)
   function updateMediaSession(song) {
     if ('mediaSession' in navigator && currentAlbum) {
       navigator.mediaSession.metadata = new MediaMetadata({
@@ -154,172 +136,94 @@
       });
       navigator.mediaSession.setActionHandler('play', () => player.play());
       navigator.mediaSession.setActionHandler('pause', () => player.pause());
-      navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
-      navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+      navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
+      navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
     }
   }
 
-  // loadAlbum: shows playlist under player (only called when user clicks an album)
   function loadAlbum(name) {
-    currentAlbum = name;
-    lastAlbum = name;
+    currentAlbum = lastAlbum = name;
     currentSong = 0;
     albumTitle.textContent = name + " Album";
-
     playlistDiv.innerHTML = "";
-    albums[name].songs.forEach((song, index) => {
+    albums[name].songs.forEach((song, i) => {
       const btn = document.createElement("button");
       btn.textContent = song.title;
-      btn.addEventListener("click", () => {
-        playSong(index); // safe — currentAlbum is set
-      });
+      btn.addEventListener("click", () => playSong(i));
       playlistDiv.appendChild(btn);
     });
-
-    // optional: scroll player into view so playlist is visible
-    // document.getElementById('playerArea').scrollIntoView({ behavior: 'smooth' });
   }
 
-  // playSong: plays an index in the current album (or fallback to lastAlbum)
   function playSong(index) {
-    // Choose album to use
-    if (!currentAlbum && lastAlbum) {
-      currentAlbum = lastAlbum;
-    }
-    if (!currentAlbum) return; // nothing to play
-
-    // clamp index
-    const songs = albums[currentAlbum].songs;
-    if (index < 0 || index >= songs.length) return;
-
-    currentSong = index;
-    const song = songs[currentSong];
-    source.src = song.file;
-    player.load();
-    player.play().catch(err => console.log("Autoplay prevented:", err));
-    playBtn.innerHTML = "&#10074;&#10074;";
-    nowPlaying.textContent = "Now Playing: " + song.title;
-    updateMediaSession(song);
-  }
-
-  // This plays a random song from a given album WITHOUT rendering the playlist UI.
-  // Used by the Home Play button so we stay in "home mode".
-  function playRandomSongSilent(albumName) {
-    if (!albums[albumName]) return;
-    currentAlbum = albumName;
-    lastAlbum = albumName;
-    const songIndex = Math.floor(Math.random() * albums[albumName].songs.length);
-    currentSong = songIndex;
-    const song = albums[albumName].songs[currentSong];
-    source.src = song.file;
-    player.load();
-    player.play().catch(err => console.log("Autoplay prevented:", err));
-    playBtn.innerHTML = "&#10074;&#10074;";
-    nowPlaying.textContent = "Now Playing: " + song.title;
-    // NOTE: do not call loadAlbum() here — that would render playlist
-    updateMediaSession(song);
-  }
-
-  // helper: plays a random album and shows its playlist (if you need it)
-  function playRandomAlbumAndShow() {
-    const albumNames = Object.keys(albums);
-    const randomAlbum = albumNames[Math.floor(Math.random() * albumNames.length)];
-    loadAlbum(randomAlbum);
-    const songIndex = Math.floor(Math.random() * albums[randomAlbum].songs.length);
-    playSong(songIndex);
-  }
-
-  // Next/Prev actions (safe fallbacks)
-  function nextTrack() {
-    // ensure we have an album to reference
     if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
     if (!currentAlbum) return;
-
-    currentSong++;
     const songs = albums[currentAlbum].songs;
-    if (currentSong >= songs.length) currentSong = 0;
+    if (index < 0 || index >= songs.length) return;
+    currentSong = index;
+    source.src = songs[currentSong].file;
+    player.load();
+    player.play().catch(err => console.log("Autoplay prevented:", err));
+    playBtn.innerHTML = "&#10074;&#10074;";
+    nowPlaying.textContent = "Now Playing: " + songs[currentSong].title;
+    updateMediaSession(songs[currentSong]);
+  }
+
+  function playRandomSongSilent(albumName) {
+    if (!albums[albumName]) return;
+    currentAlbum = lastAlbum = albumName;
+    const idx = Math.floor(Math.random() * albums[albumName].songs.length);
+    playSong(idx);
+  }
+
+  function nextTrack() {
+    if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
+    if (!currentAlbum) return;
+    currentSong = (currentSong + 1) % albums[currentAlbum].songs.length;
     playSong(currentSong);
   }
 
   function prevTrack() {
     if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
     if (!currentAlbum) return;
-
-    currentSong--;
-    const songs = albums[currentAlbum].songs;
-    if (currentSong < 0) currentSong = songs.length - 1;
+    currentSong = (currentSong - 1 + albums[currentAlbum].songs.length) % albums[currentAlbum].songs.length;
     playSong(currentSong);
   }
 
-  // --- Home square (visual clear only; does NOT stop playback) ---
+  // Home tile
   const homeSquare = document.createElement("div");
   homeSquare.className = "home-square";
-  homeSquare.innerHTML = `
-    <img src="Home.jpg" alt="Home">
-    <div class="album-title">Home</div>
-  `;
+  homeSquare.innerHTML = `<img src="Home.jpg" alt="Home"><div class="album-title">Home</div>`;
   homeSquare.addEventListener("click", () => {
     playlistDiv.innerHTML = "";
     albumTitle.textContent = "";
-    // important: do NOT reset currentAlbum/currentSong or stop the player
   });
   albumsDiv.appendChild(homeSquare);
 
-  // create album tiles
+  // Album tiles
   Object.keys(albums).forEach(name => {
     const albumDiv = document.createElement("div");
     albumDiv.className = "album";
-    albumDiv.innerHTML = `
-      <img src="${albums[name].cover}" alt="${name}">
-      <div class="album-title">${name}</div>
-    `;
-    // clicking an album loads its playlist and starts the first track
-    albumDiv.addEventListener("click", () => {
-      loadAlbum(name);
-      albumDiv.addEventListener("click", () => {
-  loadAlbum(name);
-  // Removed playSong(0) so music continues playing
-});
-
-    });
+    albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
+    albumDiv.addEventListener("click", () => loadAlbum(name));
     albumsDiv.appendChild(albumDiv);
   });
 
-  // Controls wiring
+  // Controls
   playBtn.addEventListener("click", () => {
     if (player.paused) {
-      // if no album has been selected via the UI, play a random song silently (don't show playlist)
-      if (!currentAlbum && !lastAlbum) {
-        const albumNames = Object.keys(albums);
-        const randomAlbum = albumNames[Math.floor(Math.random() * albumNames.length)];
-        playRandomSongSilent(randomAlbum);
-      } else {
-        // if an album exists (either via lastAlbum/currentAlbum), just resume
-        player.play();
-      }
+      if (!currentAlbum && !lastAlbum) playRandomSongSilent(Object.keys(albums)[Math.floor(Math.random() * Object.keys(albums).length)]);
+      else player.play();
       playBtn.innerHTML = "&#10074;&#10074;";
-    } else {
-      player.pause();
-      playBtn.innerHTML = "&#9654;";
-    }
+    } else { player.pause(); playBtn.innerHTML = "&#9654;"; }
   });
 
   document.getElementById("next").addEventListener("click", nextTrack);
   document.getElementById("prev").addEventListener("click", prevTrack);
 
-  // Keep the play/pause UI in sync with native player events
   player.addEventListener("pause", () => playBtn.innerHTML = "&#9654;");
   player.addEventListener("play", () => playBtn.innerHTML = "&#10074;&#10074;");
-  player.addEventListener("ended", () => {
-    // default: move to next track in the current/last album
-    if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
-    if (!currentAlbum) return;
-    currentSong++;
-    if (currentSong >= albums[currentAlbum].songs.length) currentSong = 0;
-    playSong(currentSong);
-  });
+  player.addEventListener("ended", nextTrack);
 
-  // --- Service Worker (optional) ---
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js')
       .then(reg => console.log('Service Worker registered', reg))
@@ -329,4 +233,3 @@
 
 </body>
 </html>
-
