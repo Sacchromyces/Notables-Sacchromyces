@@ -29,8 +29,6 @@
     #playlist button:hover { background: #444; }
     #nowPlaying { margin-top: 15px; font-weight: bold; }
     audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; background: #222; color: #eee; }
-
-    /* Controls wrapper for desktop */
     #controls { margin-top: 10px; display: flex; justify-content: center; gap: 30px; }
     .control-btn {
       background: #333; border: 1px solid #555; color: #eee; border-radius: 50%;
@@ -64,10 +62,15 @@
         transition: transform 0.3s ease;
       }
 
-      /* Prevent playlist/album title overlap */
-      #albumTitle, #playlist {
-        margin-bottom: 90px;
+      /* Solid placement under Now Playing when Home is active */
+      #mobilePlayer.homeSticky {
+        position: relative;
+        bottom: auto;
+        box-shadow: none;
       }
+
+      /* Prevent playlist/album title overlap */
+      #albumTitle, #playlist { margin-bottom: 90px; }
     }
   </style>
 </head>
@@ -153,7 +156,7 @@
   const playBtn = document.getElementById("play");
   const mobilePlayer = document.getElementById("mobilePlayer");
 
-  // Media Session
+  // --- Media Session ---
   function updateMediaSession(song) {
     if ('mediaSession' in navigator && currentAlbum) {
       navigator.mediaSession.metadata = new MediaMetadata({
@@ -169,7 +172,7 @@
     }
   }
 
-  // Load album
+  // --- Load album playlist ---
   function loadAlbum(name) {
     currentAlbum = name; lastAlbum = name; currentSong = 0;
     albumTitle.textContent = name + " Album";
@@ -180,8 +183,10 @@
       btn.addEventListener("click", () => playSong(index));
       playlistDiv.appendChild(btn);
     });
+    mobilePlayer.classList.remove("homeSticky"); // normal sticky
   }
 
+  // --- Play song ---
   function playSong(index) {
     if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
     if (!currentAlbum) return;
@@ -197,36 +202,34 @@
     updateMediaSession(song);
   }
 
-  function playRandomSongSilent(albumName) {
-    if (!albums[albumName]) return;
-    currentAlbum = albumName; lastAlbum = albumName;
-    const songIndex = Math.floor(Math.random() * albums[albumName].songs.length);
-    playSong(songIndex);
-  }
-
-  function nextTrack() { if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
-    if (!currentAlbum) return; currentSong++;
+  // --- Next/Prev tracks ---
+  function nextTrack() {
+    if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
+    if (!currentAlbum) return;
+    currentSong++;
     if (currentSong >= albums[currentAlbum].songs.length) currentSong = 0;
     playSong(currentSong);
   }
-
-  function prevTrack() { if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
-    if (!currentAlbum) return; currentSong--;
+  function prevTrack() {
+    if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
+    if (!currentAlbum) return;
+    currentSong--;
     if (currentSong < 0) currentSong = albums[currentAlbum].songs.length - 1;
     playSong(currentSong);
   }
 
-  // Home tile
+  // --- Home tile ---
   const homeSquare = document.createElement("div");
   homeSquare.className = "home-square";
   homeSquare.innerHTML = `<img src="Home.jpg" alt="Home"><div class="album-title">Home</div>`;
   homeSquare.addEventListener("click", () => {
     playlistDiv.innerHTML = "";
     albumTitle.textContent = "";
+    mobilePlayer.classList.add("homeSticky"); // solid underneath Now Playing
   });
   albumsDiv.appendChild(homeSquare);
 
-  // Album tiles
+  // --- Album tiles ---
   Object.keys(albums).forEach(name => {
     const albumDiv = document.createElement("div");
     albumDiv.className = "album";
@@ -235,20 +238,19 @@
     albumsDiv.appendChild(albumDiv);
   });
 
-  // Controls
+  // --- Controls ---
   playBtn.addEventListener("click", () => {
     if (player.paused) {
       if (!currentAlbum && !lastAlbum) {
         const albumNames = Object.keys(albums);
         const randomAlbum = albumNames[Math.floor(Math.random() * albumNames.length)];
-        playRandomSongSilent(randomAlbum);
+        playSong(Math.floor(Math.random() * albums[randomAlbum].songs.length));
       } else player.play();
       playBtn.innerHTML = "&#10074;&#10074;";
     } else { player.pause(); playBtn.innerHTML = "&#9654;"; }
   });
   document.getElementById("next").addEventListener("click", nextTrack);
   document.getElementById("prev").addEventListener("click", prevTrack);
-
   player.addEventListener("pause", () => playBtn.innerHTML = "&#9654;");
   player.addEventListener("play", () => playBtn.innerHTML = "&#10074;&#10074;");
   player.addEventListener("ended", nextTrack);
@@ -260,9 +262,10 @@
       .catch(err => console.error('Service Worker registration failed', err));
   }
 
-  // --- Scroll behavior for mobile sticky player ---
+  // --- Scroll behavior for sticky mobile player ---
   let lastScroll = 0;
   window.addEventListener('scroll', () => {
+    if (mobilePlayer.classList.contains("homeSticky")) return; // stay solid on Home
     const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
     if (currentScroll > lastScroll && currentScroll > 50) {
       mobilePlayer.style.transform = 'translateY(100%)'; // hide on scroll down
@@ -275,4 +278,3 @@
 
 </body>
 </html>
-
