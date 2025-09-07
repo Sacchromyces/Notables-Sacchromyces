@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
   <title>Music Player</title>
 
   <!-- Favicon and PWA manifest -->
@@ -27,13 +27,6 @@
       cursor: pointer; border-radius: 5px; display: block; width: 220px; margin-left: auto; margin-right: auto; transition: background 0.2s;
     }
     #playlist button:hover { background: #444; }
-    #controls { margin-top: 10px; display: flex; justify-content: center; gap: 30px; }
-    .control-btn {
-      background: #333; border: 1px solid #555; color: #eee; border-radius: 50%;
-      width: 50px; height: 50px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s, transform 0.2s;
-    }
-    .control-btn:hover { background: #555; transform: scale(1.1); }
     #nowPlaying { margin-top: 15px; font-weight: bold; }
     audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; background: #222; color: #eee; }
 
@@ -49,7 +42,34 @@
       #playlist button { width: 95%; padding: 12px; font-size: 16px; }
       audio { width: 100%; }
       #albumTitle { font-size: 20px; }
+
+      /* Sticky player at bottom */
+      #mobilePlayer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #111;
+        padding: 10px 0;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+        z-index: 9999;
+      }
+
+      /* Prevent playlist/album title overlap */
+      #albumTitle, #playlist {
+        margin-bottom: 90px;
+      }
     }
+
+    /* Controls wrapper for desktop */
+    #controls { margin-top: 10px; display: flex; justify-content: center; gap: 30px; }
+    .control-btn {
+      background: #333; border: 1px solid #555; color: #eee; border-radius: 50%;
+      width: 50px; height: 50px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .control-btn:hover { background: #555; transform: scale(1.1); }
+
   </style>
 </head>
 
@@ -57,26 +77,33 @@
 
 <h1>Music Player</h1>
 
+<!-- album tiles -->
 <div id="albums"></div>
+
+<!-- album title -->
 <h2 id="albumTitle"></h2>
 
+<!-- Playlist -->
 <div id="playerArea">
+  <p id="nowPlaying">Now Playing: None</p>
+  <div id="playlist"></div>
+</div>
+
+<!-- Sticky Mobile Player -->
+<div id="mobilePlayer">
   <div id="controls">
     <button id="prev" class="control-btn" title="Previous">&#9664;</button>
     <button id="play" class="control-btn" title="Play/Pause">&#9654;</button>
     <button id="next" class="control-btn" title="Next">&#9654;&#9654;</button>
   </div>
-
   <audio id="player" controls>
     <source id="source" src="" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
-
-  <p id="nowPlaying">Now Playing: None</p>
-  <div id="playlist"></div>
 </div>
 
 <script>
+  // --- Albums and songs ---
   const albums = {
     "Vessel": { 
       cover: "Vessel.jpg",
@@ -126,6 +153,7 @@
   const playlistDiv = document.getElementById("playlist");
   const playBtn = document.getElementById("play");
 
+  // Media Session
   function updateMediaSession(song) {
     if ('mediaSession' in navigator && currentAlbum) {
       navigator.mediaSession.metadata = new MediaMetadata({
@@ -136,20 +164,23 @@
       });
       navigator.mediaSession.setActionHandler('play', () => player.play());
       navigator.mediaSession.setActionHandler('pause', () => player.pause());
-      navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
-      navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
+      navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+      navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
     }
   }
 
+  // Load album
   function loadAlbum(name) {
-    currentAlbum = lastAlbum = name;
+    currentAlbum = name;
+    lastAlbum = name;
     currentSong = 0;
     albumTitle.textContent = name + " Album";
+
     playlistDiv.innerHTML = "";
-    albums[name].songs.forEach((song, i) => {
+    albums[name].songs.forEach((song, index) => {
       const btn = document.createElement("button");
       btn.textContent = song.title;
-      btn.addEventListener("click", () => playSong(i));
+      btn.addEventListener("click", () => playSong(index));
       playlistDiv.appendChild(btn);
     });
   }
@@ -157,35 +188,41 @@
   function playSong(index) {
     if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
     if (!currentAlbum) return;
+
     const songs = albums[currentAlbum].songs;
     if (index < 0 || index >= songs.length) return;
+
     currentSong = index;
-    source.src = songs[currentSong].file;
+    const song = songs[currentSong];
+    source.src = song.file;
     player.load();
     player.play().catch(err => console.log("Autoplay prevented:", err));
     playBtn.innerHTML = "&#10074;&#10074;";
-    nowPlaying.textContent = "Now Playing: " + songs[currentSong].title;
-    updateMediaSession(songs[currentSong]);
+    nowPlaying.textContent = "Now Playing: " + song.title;
+    updateMediaSession(song);
   }
 
   function playRandomSongSilent(albumName) {
     if (!albums[albumName]) return;
-    currentAlbum = lastAlbum = albumName;
-    const idx = Math.floor(Math.random() * albums[albumName].songs.length);
-    playSong(idx);
+    currentAlbum = albumName;
+    lastAlbum = albumName;
+    const songIndex = Math.floor(Math.random() * albums[albumName].songs.length);
+    playSong(songIndex);
   }
 
   function nextTrack() {
     if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
     if (!currentAlbum) return;
-    currentSong = (currentSong + 1) % albums[currentAlbum].songs.length;
+    currentSong++;
+    if (currentSong >= albums[currentAlbum].songs.length) currentSong = 0;
     playSong(currentSong);
   }
 
   function prevTrack() {
     if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
     if (!currentAlbum) return;
-    currentSong = (currentSong - 1 + albums[currentAlbum].songs.length) % albums[currentAlbum].songs.length;
+    currentSong--;
+    if (currentSong < 0) currentSong = albums[currentAlbum].songs.length - 1;
     playSong(currentSong);
   }
 
@@ -211,10 +248,16 @@
   // Controls
   playBtn.addEventListener("click", () => {
     if (player.paused) {
-      if (!currentAlbum && !lastAlbum) playRandomSongSilent(Object.keys(albums)[Math.floor(Math.random() * Object.keys(albums).length)]);
-      else player.play();
+      if (!currentAlbum && !lastAlbum) {
+        const albumNames = Object.keys(albums);
+        const randomAlbum = albumNames[Math.floor(Math.random() * albumNames.length)];
+        playRandomSongSilent(randomAlbum);
+      } else player.play();
       playBtn.innerHTML = "&#10074;&#10074;";
-    } else { player.pause(); playBtn.innerHTML = "&#9654;"; }
+    } else {
+      player.pause();
+      playBtn.innerHTML = "&#9654;";
+    }
   });
 
   document.getElementById("next").addEventListener("click", nextTrack);
@@ -224,6 +267,7 @@
   player.addEventListener("play", () => playBtn.innerHTML = "&#10074;&#10074;");
   player.addEventListener("ended", nextTrack);
 
+  // Optional Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js')
       .then(reg => console.log('Service Worker registered', reg))
