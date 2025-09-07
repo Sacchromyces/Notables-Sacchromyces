@@ -23,16 +23,25 @@
   #playlist button { margin: 5px; padding: 10px 15px; background: #222; border: 1px solid #555; color: #eee; cursor: pointer; border-radius: 5px; display: block; width: 220px; margin-left:auto; margin-right:auto; transition: background 0.2s; }
   #playlist button:hover { background: #444; }
   #nowPlaying { margin-top: 15px; font-weight: bold; }
-  audio { display:none; }
-  
-  /* Controls wrapper */
-  #controls { display: flex; justify-content: center; gap: 20px; align-items:center; }
-  .control-btn { width:50px; height:50px; border-radius:50%; border:none; background:#1db954; color:#fff; font-size:20px; display:flex; justify-content:center; align-items:center; cursor:pointer; transition: transform 0.2s, filter 0.2s; }
-  .control-btn:hover { transform: scale(1.1); filter: brightness(1.2); }
-  #play { width:60px; height:60px; font-size:28px; }
+  audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; background: #222; color: #eee; }
+  #controls { margin-top: 10px; display: flex; justify-content: center; gap: 20px; align-items:center; }
 
-  /* Mobile sticky player */
-  @media (max-width:480px){
+  /* Spotify-style buttons */
+  .control-btn {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: #1db954;
+    color: #fff;
+    font-size: 20px;
+    display:flex; justify-content:center; align-items:center;
+    cursor:pointer;
+    transition: transform 0.2s, filter 0.2s;
+  }
+  .control-btn:hover { transform: scale(1.1); filter: brightness(1.2); }
+  #play { width: 60px; height: 60px; font-size: 28px; }
+
+  @media (max-width:480px) {
     body { padding:10px; font-size:16px; }
     h1 { font-size:24px; margin-bottom:15px; }
     #albums { flex-direction: column; gap: 15px; align-items: center; }
@@ -41,54 +50,43 @@
     .control-btn { width:50px; height:50px; font-size:20px; }
     #play { width:60px; height:60px; font-size:28px; }
     #playlist button { width:95%; padding:12px; font-size:16px; }
+    audio { width:100%; }
     #albumTitle { font-size:20px; }
 
+    /* Sticky mobile player */
     #mobilePlayer {
       position: fixed;
-      bottom: 0;
+      bottom: 10px;
       left: 0;
       width: 100%;
       background: #111;
-      padding: 10px 0 5px;
+      padding: 10px 0;
       box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
       z-index: 9999;
       transition: all 0.3s ease;
     }
-    #mobilePlayer.docked { position:absolute; bottom:0; box-shadow:none; }
-
-    #progressContainer {
-      width: 95%;
-      margin: 0 auto 8px;
-      height: 4px;
-      background: #333;
-      border-radius: 2px;
-      cursor:pointer;
-    }
-    #progress {
-      width: 0%;
-      height: 100%;
-      background: #1db954;
-      border-radius: 2px;
+    #mobilePlayer.docked { 
+      position: absolute;
+      bottom: 0;
+      box-shadow: none;
     }
 
+    /* Avoid overlap */
     #albumTitle, #playlist { margin-bottom: 120px; }
   }
 </style>
 </head>
-
 <body>
 
 <h1>Music Player</h1>
 <div id="albums"></div>
 <h2 id="albumTitle"></h2>
 <div id="playerArea">
-  <p id="nowPlaying">Now Playing: None</p>
   <div id="playlist"></div>
+  <p id="nowPlaying">Now Playing: None</p>
 </div>
 
-<!-- Sticky Mobile Player -->
 <div id="mobilePlayer">
-  <div id="progressContainer"><div id="progress"></div></div>
   <div id="controls">
     <button id="prev" class="control-btn" title="Previous">&#10094;</button>
     <button id="play" class="control-btn" title="Play/Pause">&#9654;</button>
@@ -144,12 +142,16 @@ const albumsDiv=document.getElementById("albums");
 const playlistDiv=document.getElementById("playlist");
 const playBtn=document.getElementById("play");
 const mobilePlayer=document.getElementById("mobilePlayer");
-const progress=document.getElementById("progress");
-const progressContainer=document.getElementById("progressContainer");
 
+// Media session for phone controls
 function updateMediaSession(song){
   if('mediaSession' in navigator && currentAlbum){
-    navigator.mediaSession.metadata=new MediaMetadata({title:song.title, artist:currentAlbum, album:currentAlbum, artwork:[{src:albums[currentAlbum].cover,sizes:'300x300',type:'image/jpeg'}]});
+    navigator.mediaSession.metadata=new MediaMetadata({
+      title:song.title,
+      artist:currentAlbum,
+      album:currentAlbum,
+      artwork:[{src:albums[currentAlbum].cover,sizes:'300x300',type:'image/jpeg'}]
+    });
     navigator.mediaSession.setActionHandler('play',()=>player.play());
     navigator.mediaSession.setActionHandler('pause',()=>player.pause());
     navigator.mediaSession.setActionHandler('previoustrack',()=>prevTrack());
@@ -157,6 +159,7 @@ function updateMediaSession(song){
   }
 }
 
+// Load album
 function loadAlbum(name){
   currentAlbum=name; lastAlbum=name; currentSong=0;
   albumTitle.textContent=name+" Album";
@@ -169,6 +172,7 @@ function loadAlbum(name){
   });
 }
 
+// Play a song
 function playSong(index){
   if(!currentAlbum && lastAlbum) currentAlbum=lastAlbum;
   if(!currentAlbum) return;
@@ -184,6 +188,7 @@ function playSong(index){
   updateMediaSession(song);
 }
 
+// Next/Prev tracks
 function nextTrack(){ if(!currentAlbum && lastAlbum) currentAlbum=lastAlbum; if(!currentAlbum) return; currentSong++; if(currentSong>=albums[currentAlbum].songs.length) currentSong=0; playSong(currentSong);}
 function prevTrack(){ if(!currentAlbum && lastAlbum) currentAlbum=lastAlbum; if(!currentAlbum) return; currentSong--; if(currentSong<0) currentSong=albums[currentAlbum].songs.length-1; playSong(currentSong);}
 
@@ -191,7 +196,10 @@ function prevTrack(){ if(!currentAlbum && lastAlbum) currentAlbum=lastAlbum; if(
 const homeSquare=document.createElement("div");
 homeSquare.className="home-square";
 homeSquare.innerHTML=`<img src="Home.jpg" alt="Home"><div class="album-title">Home</div>`;
-homeSquare.addEventListener("click",()=>{ playlistDiv.innerHTML=""; albumTitle.textContent=""; });
+homeSquare.addEventListener("click",()=>{
+  playlistDiv.innerHTML="";
+  albumTitle.textContent="";
+});
 albumsDiv.appendChild(homeSquare);
 
 // Album tiles
@@ -220,20 +228,16 @@ player.addEventListener("pause",()=>playBtn.innerHTML="&#9654;");
 player.addEventListener("play",()=>playBtn.innerHTML="&#10074;&#10074;");
 player.addEventListener("ended",nextTrack);
 
-// Progress bar update
-player.addEventListener("timeupdate",()=>{ progress.style.width=(player.currentTime/player.duration*100||0)+'%'; });
-progressContainer.addEventListener("click",(e)=>{
-  const rect=progressContainer.getBoundingClientRect();
-  const clickPos=(e.clientX-rect.left)/rect.width;
-  player.currentTime=clickPos*player.duration;
-});
-
-// Dock sticky player at bottom on scroll to page bottom
+// Sticky behavior: floating then docked at page bottom
+let lastScroll=0;
 window.addEventListener('scroll',()=>{
   const scrollTop=window.pageYOffset||document.documentElement.scrollTop;
-  const scrollBottom=document.documentElement.scrollHeight-window.innerHeight-scrollTop;
+  const scrollHeight=document.documentElement.scrollHeight;
+  const clientHeight=document.documentElement.clientHeight;
+  const scrollBottom=scrollHeight - clientHeight - scrollTop;
   if(scrollBottom<5) mobilePlayer.classList.add("docked");
   else mobilePlayer.classList.remove("docked");
+  lastScroll=scrollTop;
 });
 </script>
 
