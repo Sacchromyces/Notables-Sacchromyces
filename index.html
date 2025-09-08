@@ -22,7 +22,7 @@
   #playerArea { margin-top: 10px; }
   #playlist button { margin: 5px; padding: 10px 15px; background: #222; border: 1px solid #555; color: #eee; cursor: pointer; border-radius: 5px; display: block; width: 220px; margin-left:auto; margin-right:auto; transition: background 0.2s; }
   #playlist button:hover { background: #444; }
-  #nowPlaying { margin: 15px 0; font-weight: bold; }
+  #nowPlaying { margin: 10px 0; font-weight: bold; }
   audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; background: #222; color: #eee; }
 
   /* Controls wrapper */
@@ -44,7 +44,7 @@
   #play { width: 60px; height: 60px; font-size: 28px; }
 
   @media (max-width:480px) {
-    body { padding:10px; font-size:16px; }
+    body { padding:10px; font-size:16px; padding-bottom: 140px; /* extra space for sticky player */ }
     h1 { font-size:24px; margin-bottom:15px; }
     #albums { flex-direction: column; gap: 15px; align-items: center; }
     .album, .home-square { width: 90%; }
@@ -55,7 +55,7 @@
     audio { width:100%; }
     #albumTitle { font-size:20px; }
 
-    /* Mobile player positioning */
+    /* Mobile player */
     #mobilePlayer {
       position: fixed;
       left: 0;
@@ -66,8 +66,13 @@
       z-index: 9999;
       transition: all 0.3s ease;
     }
+    #mobilePlayer.docked {
+      position: absolute;
+      box-shadow: none;
+    }
+    #albumTitle, #playlist { margin-bottom: 20px; }
 
-    /* Home tile becomes a thin box on mobile */
+    /* Home tile turns into thin box */
     .home-square img { display: none; }
     .home-square {
       background:#222;
@@ -213,14 +218,16 @@ function prevTrack(){
   playSong(currentSong);
 }
 
-// ✅ Home tile (desktop image, mobile thin box)
+// Home tile
 const homeSquare=document.createElement("div");
 homeSquare.className="home-square";
 homeSquare.innerHTML=`<img src="Home.jpg" alt="Home"><div class="album-title">Home</div>`;
 homeSquare.addEventListener("click",()=>{
   playlistDiv.innerHTML="";
   albumTitle.textContent="";
-  if(!currentAlbum && player.paused) nowPlaying.textContent="Now Playing: None";
+  if(!currentAlbum && player.paused){
+    nowPlaying.textContent="Now Playing: None";
+  }
 });
 albumsDiv.appendChild(homeSquare);
 
@@ -258,21 +265,21 @@ player.addEventListener("pause",()=>playBtn.innerHTML="&#9654;");
 player.addEventListener("play",()=>playBtn.innerHTML="&#10074;&#10074;");
 player.addEventListener("ended", nextTrack);
 
-// ✅ Mobile sticky slide & dock below Now Playing
+// Mobile sticky player slide & dock below Now Playing
 window.addEventListener('scroll', ()=>{
-  if(window.innerWidth > 480) return; // Only mobile
+  if(window.innerWidth > 480) return; // Desktop unchanged
   const nowPlayingRect = nowPlaying.getBoundingClientRect();
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
   const scrollBottom = document.documentElement.scrollHeight - window.innerHeight - scrollTop;
-  const distanceToNowPlayingBottom = nowPlayingRect.bottom;
+  const distanceToNowPlayingBottom = nowPlayingRect.bottom + window.scrollY;
 
-  if(scrollBottom < 10){
-    // Dock below Now Playing
+  if(scrollBottom < 5){
+    // Dock fully below Now Playing
     mobilePlayer.style.position = 'absolute';
-    mobilePlayer.style.top = (window.scrollY + distanceToNowPlayingBottom + 50) + 'px'; // 50px gap
+    mobilePlayer.style.top = (distanceToNowPlayingBottom + 10) + 'px'; // 10px gap
     mobilePlayer.style.bottom = 'auto';
   } else {
-    // Normal sliding sticky
+    // Normal sticky sliding
     mobilePlayer.style.position = 'fixed';
     mobilePlayer.style.bottom = '0';
     mobilePlayer.style.top = 'auto';
@@ -281,5 +288,3 @@ window.addEventListener('scroll', ()=>{
 </script>
 </body>
 </html>
-
-
