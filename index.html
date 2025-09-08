@@ -181,7 +181,6 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 </div>
 
 <script>
-// Album Data (all original songs preserved)
 const albums = {
   "Vessel": { cover:"Vessel.jpg", songs:[
     {file:"Ode_to_Sleep.mp3", title:"Ode to Sleep"},
@@ -240,7 +239,7 @@ const albumsDiv=document.getElementById("albums");
 const playlistDiv=document.getElementById("playlist");
 const playBtn=document.getElementById("play");
 
-// Media Session API for notification controls
+// Media Session API
 function updateMediaSession(song){
   if('mediaSession' in navigator && currentAlbum){
     const ext = albums[currentAlbum].cover.split('.').pop().toLowerCase();
@@ -312,7 +311,8 @@ playBtn.addEventListener("click", ()=>{
   if(player.paused){
     if(!currentAlbum){
       const albumNames = Object.keys(albums);
-      playSong(0, albumNames[0]);
+      const randomAlbum = albumNames[Math.floor(Math.random()*albumNames.length)];
+      playSong(0, randomAlbum);
     } else player.play();
     playBtn.innerHTML="&#10074;&#10074;";
   } else {
