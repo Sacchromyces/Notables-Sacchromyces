@@ -266,10 +266,10 @@ window.addEventListener('scroll', ()=>{
   const scrollBottom = document.documentElement.scrollHeight - window.innerHeight - scrollTop;
   const distanceToNowPlayingBottom = nowPlayingRect.bottom;
 
-  if(scrollBottom < 5){
+  if(scrollBottom < 10){
     // Dock below Now Playing
     mobilePlayer.style.position = 'absolute';
-    mobilePlayer.style.top = (window.scrollY + distanceToNowPlayingBottom + 20) + 'px'; // 20px gap
+    mobilePlayer.style.top = (window.scrollY + distanceToNowPlayingBottom + 50) + 'px'; // 50px gap
     mobilePlayer.style.bottom = 'auto';
   } else {
     // Normal sliding sticky
@@ -281,4 +281,5 @@ window.addEventListener('scroll', ()=>{
 </script>
 </body>
 </html>
+
 
