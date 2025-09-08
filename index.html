@@ -3,7 +3,7 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="UTF-8">
-<title>Music Player</title>
+<title>Notables</title>
 
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -22,13 +22,13 @@
   #playerArea { margin-top: 10px; }
   #playlist button { margin: 5px; padding: 10px 15px; background: #222; border: 1px solid #555; color: #eee; cursor: pointer; border-radius: 5px; display: block; width: 220px; margin-left:auto; margin-right:auto; transition: background 0.2s; }
   #playlist button:hover { background: #444; }
-  #nowPlaying { margin: 10px 0; font-weight: bold; }
+  #nowPlaying { margin: 15px 0; font-weight: bold; }
   audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; background: #222; color: #eee; }
 
   /* Controls wrapper */
-  #controls { margin-top: 5px; display: flex; justify-content: center; gap: 20px; align-items:center; }
+  #controls { margin-top: 10px; display: flex; justify-content: center; gap: 20px; align-items:center; }
 
-  /* Buttons (desktop & mobile look consistent) */
+  /* Spotify-style buttons */
   .control-btn {
     width: 50px; height: 50px;
     border-radius: 50%;
@@ -43,38 +43,17 @@
   .control-btn:hover { transform: scale(1.1); filter: brightness(1.2); }
   #play { width: 60px; height: 60px; font-size: 28px; }
 
-  /* --- Mobile adjustments --- */
   @media (max-width:480px) {
     body { padding:10px; font-size:16px; }
     h1 { font-size:24px; margin-bottom:15px; }
-    #albums { flex-direction: column; gap: 12px; align-items: center; }
+    #albums { flex-direction: column; gap: 15px; align-items: center; }
     .album, .home-square { width: 90%; }
-
-    /* hide Home image on mobile and show a thin boxed label */
-    .home-square img { display: none; }
-    .home-square {
-      background:#222;
-      border:1px solid #555;
-      border-radius:6px;
-      padding:12px;
-      font-weight:bold;
-      font-size:18px;
-      color:#eee;
-      text-align:center;
-      width:90%;
-      box-sizing:border-box;
-    }
-    .home-square:hover { background:#333; }
-
-    .album img { width:100%; height:auto; }
-
-    #albumTitle { font-size:20px; margin-bottom: 8px; }
-    #nowPlaying { margin: 8px 0; }
-
+    .album img, .home-square img { width:100%; height:auto; }
     .control-btn { width:50px; height:50px; font-size:20px; }
     #play { width:60px; height:60px; font-size:28px; }
     #playlist button { width:95%; padding:12px; font-size:16px; }
     audio { width:100%; }
+    #albumTitle { font-size:20px; }
 
     #mobilePlayer {
       position: fixed;
@@ -92,13 +71,29 @@
       bottom: 0;
       box-shadow: none;
     }
-    #albumTitle, #playlist { margin-bottom: 70px; }
+    #albumTitle, #playlist { margin-bottom: 90px; }
+
+    /* ✅ Home tile turns into a thin box on mobile */
+    .home-square img { display: none; }
+    .home-square {
+      background:#222;
+      border:1px solid #555;
+      border-radius:6px;
+      padding:12px;
+      font-weight:bold;
+      font-size:18px;
+      color:#eee;
+      text-align:center;
+      width:90%;
+      box-sizing:border-box;
+    }
+    .home-square:hover { background:#333; }
   }
 </style>
 </head>
 <body>
 
-<h1>Music Player</h1>
+<h1>Notables</h1>
 <div id="albums"></div>
 <h2 id="albumTitle"></h2>
 <div id="playerArea">
@@ -163,126 +158,120 @@ const playlistDiv=document.getElementById("playlist");
 const playBtn=document.getElementById("play");
 const mobilePlayer=document.getElementById("mobilePlayer");
 
-// Render Home tile (image shown on desktop; hidden on mobile by CSS)
-const homeSquare = document.createElement("div");
-homeSquare.className = "home-square";
-homeSquare.innerHTML = `<img src="Home.jpg" alt="Home"><div class="album-title">Home</div>`;
-homeSquare.addEventListener("click", () => {
-  // Clear UI playlist and album title, but keep Now Playing if a song is actively playing.
-  playlistDiv.innerHTML = "";
-  albumTitle.textContent = "";
-  // only reset Now Playing if there's no active source AND the player is paused
-  if (player.paused && !player.currentSrc) {
-    nowPlaying.textContent = "Now Playing: None";
-  }
-});
-albumsDiv.appendChild(homeSquare);
-
-// Album tiles
-Object.keys(albums).forEach(name => {
-  const albumDiv = document.createElement("div");
-  albumDiv.className = "album";
-  albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
-  albumDiv.addEventListener("click", () => loadAlbum(name));
-  albumsDiv.appendChild(albumDiv);
-});
-
-// Media session helper
 function updateMediaSession(song){
-  if ('mediaSession' in navigator && currentAlbum) {
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: song.title,
-      artist: currentAlbum,
-      album: currentAlbum,
-      artwork: [{ src: albums[currentAlbum].cover, sizes: '300x300', type: 'image/jpeg' }]
+  if('mediaSession' in navigator && currentAlbum){
+    navigator.mediaSession.metadata=new MediaMetadata({
+      title:song.title,
+      artist:currentAlbum,
+      album:currentAlbum,
+      artwork:[{src:albums[currentAlbum].cover,sizes:'300x300',type:'image/jpeg'}]
     });
-    navigator.mediaSession.setActionHandler('play', () => player.play());
-    navigator.mediaSession.setActionHandler('pause', () => player.pause());
-    navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
-    navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+    navigator.mediaSession.setActionHandler('play',()=>player.play());
+    navigator.mediaSession.setActionHandler('pause',()=>player.pause());
+    navigator.mediaSession.setActionHandler('previoustrack',()=>prevTrack());
+    navigator.mediaSession.setActionHandler('nexttrack',()=>nextTrack());
   }
 }
 
-// Load album into playlist UI
 function loadAlbum(name){
-  currentAlbum = name;
-  lastAlbum = name;
-  currentSong = 0;
-  albumTitle.textContent = name + " Album";
-  playlistDiv.innerHTML = "";
-  albums[name].songs.forEach((song, index) => {
-    const btn = document.createElement("button");
-    btn.textContent = song.title;
-    btn.addEventListener("click", () => playSong(index));
+  currentAlbum=name; lastAlbum=name; currentSong=0;
+  albumTitle.textContent=name+" Album";
+  playlistDiv.innerHTML="";
+  albums[name].songs.forEach((song,index)=>{
+    const btn=document.createElement("button");
+    btn.textContent=song.title;
+    btn.addEventListener("click",()=>playSong(index));
     playlistDiv.appendChild(btn);
   });
 }
 
-// Play a song; optional albumName to pick album when random-playing
-function playSong(index, albumName = null){
-  if (albumName) currentAlbum = albumName;
-  if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
-  if (!currentAlbum) return;
+function playSong(index, albumName=null){
+  if(albumName) currentAlbum = albumName;
+  if(!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
+  if(!currentAlbum) return;
 
   const songs = albums[currentAlbum].songs;
-  if (index < 0 || index >= songs.length) return;
-  currentSong = index;
+  if(index<0||index>=songs.length) return;
+  currentSong=index;
   const song = songs[currentSong];
-  source.src = song.file;
+  source.src=song.file;
   player.load();
-  player.play().catch(err => console.log("Autoplay prevented:", err));
-  playBtn.innerHTML = "&#10074;&#10074;";
-  nowPlaying.textContent = "Now Playing: " + song.title;
+  player.play().catch(err=>console.log("Autoplay prevented:",err));
+  playBtn.innerHTML="&#10074;&#10074;";
+  nowPlaying.textContent="Now Playing: "+song.title;
   lastAlbum = currentAlbum;
   updateMediaSession(song);
 }
 
 function nextTrack(){
-  if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
-  if (!currentAlbum) return;
+  if(!currentAlbum && lastAlbum) currentAlbum=lastAlbum;
+  if(!currentAlbum) return;
   currentSong++;
-  if (currentSong >= albums[currentAlbum].songs.length) currentSong = 0;
+  if(currentSong>=albums[currentAlbum].songs.length) currentSong=0;
   playSong(currentSong);
 }
 
 function prevTrack(){
-  if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
-  if (!currentAlbum) return;
+  if(!currentAlbum && lastAlbum) currentAlbum=lastAlbum;
+  if(!currentAlbum) return;
   currentSong--;
-  if (currentSong < 0) currentSong = albums[currentAlbum].songs.length - 1;
+  if(currentSong<0) currentSong=albums[currentAlbum].songs.length-1;
   playSong(currentSong);
 }
 
-// Controls wiring
-playBtn.addEventListener("click", () => {
-  if (player.paused) {
-    // If nothing selected yet, pick a random album + song
-    if (!currentAlbum) {
+// ✅ Home tile (image on desktop, thin box on mobile)
+const homeSquare=document.createElement("div");
+homeSquare.className="home-square";
+homeSquare.innerHTML=`<img src="Home.jpg" alt="Home"><div class="album-title">Home</div>`;
+homeSquare.addEventListener("click",()=>{
+  playlistDiv.innerHTML="";
+  albumTitle.textContent="";
+  // Do NOT reset Now Playing if a song is active
+  if (!currentAlbum && player.paused) {
+    nowPlaying.textContent="Now Playing: None";
+  }
+});
+albumsDiv.appendChild(homeSquare);
+
+// Album tiles
+Object.keys(albums).forEach(name=>{
+  const albumDiv=document.createElement("div");
+  albumDiv.className="album";
+  albumDiv.innerHTML=`<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
+  albumDiv.addEventListener("click",()=>loadAlbum(name));
+  albumsDiv.appendChild(albumDiv);
+});
+
+// Controls
+playBtn.addEventListener("click",()=>{
+  if(player.paused){
+    if(!currentAlbum){
       const albumNames = Object.keys(albums);
-      const randomAlbum = albumNames[Math.floor(Math.random() * albumNames.length)];
-      const songIndex = Math.floor(Math.random() * albums[randomAlbum].songs.length);
+      const randomAlbum = albumNames[Math.floor(Math.random()*albumNames.length)];
+      const songIndex = Math.floor(Math.random()*albums[randomAlbum].songs.length);
       playSong(songIndex, randomAlbum);
     } else {
       player.play();
     }
-    playBtn.innerHTML = "&#10074;&#10074;";
+    playBtn.innerHTML="&#10074;&#10074;";
   } else {
     player.pause();
-    playBtn.innerHTML = "&#9654;";
+    playBtn.innerHTML="&#9654;";
   }
 });
+
 document.getElementById("next").addEventListener("click", nextTrack);
 document.getElementById("prev").addEventListener("click", prevTrack);
 
-player.addEventListener("pause", () => playBtn.innerHTML = "&#9654;");
-player.addEventListener("play", () => playBtn.innerHTML = "&#10074;&#10074;");
+player.addEventListener("pause",()=>playBtn.innerHTML="&#9654;");
+player.addEventListener("play",()=>playBtn.innerHTML="&#10074;&#10074;");
 player.addEventListener("ended", nextTrack);
 
-// Sticky behavior: dock only when scrolled to page bottom
-window.addEventListener('scroll', () => {
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-  const scrollBottom = document.documentElement.scrollHeight - document.documentElement.clientHeight - scrollTop;
-  if (scrollBottom < 5) mobilePlayer.classList.add("docked");
+// Dock sticky player at bottom on scroll
+window.addEventListener('scroll',()=>{
+  const scrollTop=window.pageYOffset||document.documentElement.scrollTop;
+  const scrollBottom=document.documentElement.scrollHeight-window.innerHeight-scrollTop;
+  if(scrollBottom<5) mobilePlayer.classList.add("docked");
   else mobilePlayer.classList.remove("docked");
 });
 </script>
