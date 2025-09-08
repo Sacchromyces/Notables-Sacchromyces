@@ -21,7 +21,7 @@
     padding:20px;
   }
 
-  /* Header with logo */
+  /* Header with circular logo */
   #mainHeader {
     display: flex;
     align-items: center;
@@ -30,9 +30,10 @@
     margin-bottom: 20px;
   }
   #mainHeader img#logo {
-    width: 30px;  /* desktop size */
+    width: 30px;   /* desktop size */
     height: 30px;
-    object-fit: contain;
+    object-fit: cover;
+    border-radius: 50%;  /* makes logo circular */
   }
   #mainHeader h1 {
     margin: 0;
@@ -117,12 +118,11 @@
     body { padding:10px; font-size:16px; padding-bottom: 160px; }
 
     #mainHeader img#logo {
-      width: 25px;  /* mobile size */
+      width: 25px;   /* mobile size */
       height: 25px;
+      border-radius: 50%;
     }
-    #mainHeader h1 {
-      font-size: 22px;
-    }
+    #mainHeader h1 { font-size: 22px; }
 
     #albums { flex-direction: column; gap: 15px; align-items: center; }
     .album, .home-square { width: 90%; }
@@ -353,7 +353,7 @@ player.addEventListener("pause",()=>playBtn.innerHTML="&#9654;");
 player.addEventListener("play",()=>playBtn.innerHTML="&#10074;&#10074;");
 player.addEventListener("ended", nextTrack);
 
-// Mobile sticky player slide & dock
+// Mobile sticky player
 window.addEventListener('scroll', ()=>{
   if(window.innerWidth > 480) return; 
   const nowPlayingRect = nowPlaying.getBoundingClientRect();
@@ -374,4 +374,3 @@ window.addEventListener('scroll', ()=>{
 </script>
 </body>
 </html>
-
