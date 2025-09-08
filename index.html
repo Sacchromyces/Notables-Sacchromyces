@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
 <title>Notables</title>
 
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -25,14 +25,15 @@ body {
 #mainHeader {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 10px;
     margin-bottom: 20px;
 }
 #mainHeader img#logo {
-    width: 50px;
+    width: 50px; /* desktop size */
     height: 50px;
     object-fit: cover;
-    border-radius: 50%;
+    border-radius: 50%;  /* circular */
 }
 #mainHeader h1 {
     margin: 0;
@@ -40,7 +41,6 @@ body {
     font-weight: bold;
 }
 
-/* Albums */
 #albums {
     display: flex;
     justify-content: center;
@@ -72,7 +72,6 @@ body {
     margin-bottom: 5px;
 }
 
-/* Player Area */
 #playerArea {
     margin-top: 10px;
 }
@@ -84,6 +83,7 @@ body {
     color: #eee;
     cursor: pointer;
     border-radius: 5px;
+    display: block;
     width: 220px;
     margin-left:auto;
     margin-right:auto;
@@ -137,6 +137,8 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
         z-index: 9999;
         transition: all 0.3s ease;
     }
+    #mobilePlayer.docked { position: absolute; box-shadow: none; }
+    #albumTitle, #playlist { margin-bottom: 20px; }
     .home-square img { display: none; }
     .home-square {
         background:#222;
@@ -238,28 +240,25 @@ const albumTitle=document.getElementById("albumTitle");
 const albumsDiv=document.getElementById("albums");
 const playlistDiv=document.getElementById("playlist");
 const playBtn=document.getElementById("play");
+const mobilePlayer=document.getElementById("mobilePlayer");
 
-// Media Session API
+// Update media session for system notification / lock screen
 function updateMediaSession(song){
   if('mediaSession' in navigator && currentAlbum){
     const ext = albums[currentAlbum].cover.split('.').pop().toLowerCase();
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: song.title,
+    navigator.mediaSession.metadata=new MediaMetadata({
+      title:song.title,
       artist: currentAlbum,
       album: currentAlbum,
-      artwork: [{ src: albums[currentAlbum].cover, sizes: '300x300', type:`image/${ext}`}]
+      artwork:[{src:albums[currentAlbum].cover, sizes:'300x300', type:`image/${ext}`}]
     });
     navigator.mediaSession.setActionHandler('play', ()=>player.play());
     navigator.mediaSession.setActionHandler('pause', ()=>player.pause());
-    navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
-    navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
-    navigator.mediaSession.setActionHandler('seekbackward', (details) => { player.currentTime = Math.max(player.currentTime - (details.seekOffset || 10), 0); });
-    navigator.mediaSession.setActionHandler('seekforward', (details) => { player.currentTime = Math.min(player.currentTime + (details.seekOffset || 10), player.duration); });
-    navigator.mediaSession.setActionHandler('seekto', (details) => { if(details.fastSeek && 'fastSeek' in player) { player.fastSeek(details.seekTime); return; } player.currentTime = details.seekTime; });
+    navigator.mediaSession.setActionHandler('previoustrack', ()=>prevTrack());
+    navigator.mediaSession.setActionHandler('nexttrack', ()=>nextTrack());
   }
 }
 
-// Load Album
 function loadAlbum(name){
   currentAlbum=name; lastAlbum=name; currentSong=0;
   albumTitle.textContent=name;
@@ -272,59 +271,38 @@ function loadAlbum(name){
   });
 }
 
-// Play Song
 function playSong(index, albumName=null){
   if(albumName) currentAlbum = albumName;
   if(!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
   if(!currentAlbum) return;
   const songs = albums[currentAlbum].songs;
   if(index<0||index>=songs.length) return;
-  currentSong = index;
+  currentSong=index;
   const song = songs[currentSong];
-  source.src = song.file;
+  source.src=song.file;
   player.load();
-  player.play().catch(err=>console.log(err));
+  player.play().catch(err=>console.log("Autoplay prevented:",err));
   playBtn.innerHTML="&#10074;&#10074;";
   nowPlaying.textContent="Now Playing: "+song.title;
   lastAlbum=currentAlbum;
   updateMediaSession(song);
 }
 
-// Next/Previous
 function nextTrack(){
   if(!currentAlbum && lastAlbum) currentAlbum=lastAlbum;
   if(!currentAlbum) return;
   currentSong++;
-  if(currentSong >= albums[currentAlbum].songs.length) currentSong=0;
+  if(currentSong>=albums[currentAlbum].songs.length) currentSong=0;
   playSong(currentSong);
 }
+
 function prevTrack(){
   if(!currentAlbum && lastAlbum) currentAlbum=lastAlbum;
   if(!currentAlbum) return;
   currentSong--;
-  if(currentSong < 0) currentSong = albums[currentAlbum].songs.length-1;
+  if(currentSong<0) currentSong=albums[currentAlbum].songs.length-1;
   playSong(currentSong);
 }
-
-// Controls
-playBtn.addEventListener("click", ()=>{
-  if(player.paused){
-    if(!currentAlbum){
-      const albumNames = Object.keys(albums);
-      const randomAlbum = albumNames[Math.floor(Math.random()*albumNames.length)];
-      playSong(0, randomAlbum);
-    } else player.play();
-    playBtn.innerHTML="&#10074;&#10074;";
-  } else {
-    player.pause();
-    playBtn.innerHTML="&#9654;";
-  }
-});
-document.getElementById("next").addEventListener("click", nextTrack);
-document.getElementById("prev").addEventListener("click", prevTrack);
-player.addEventListener("pause", ()=>playBtn.innerHTML="&#9654;");
-player.addEventListener("play", ()=>playBtn.innerHTML="&#10074;&#10074;");
-player.addEventListener("ended", nextTrack);
 
 // Home tile
 const homeSquare=document.createElement("div");
@@ -333,7 +311,9 @@ homeSquare.innerHTML=`<img src="Home.jpg" alt="Home"><div class="album-title">Ho
 homeSquare.addEventListener("click",()=>{
   playlistDiv.innerHTML="";
   albumTitle.textContent="";
-  if(player.paused) nowPlaying.textContent="Now Playing: None";
+  if(!currentAlbum && player.paused){
+    nowPlaying.textContent="Now Playing: None";
+  }
 });
 albumsDiv.appendChild(homeSquare);
 
@@ -344,6 +324,44 @@ Object.keys(albums).forEach(name=>{
   albumDiv.innerHTML=`<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
   albumDiv.addEventListener("click", ()=>loadAlbum(name));
   albumsDiv.appendChild(albumDiv);
+});
+
+// Controls
+playBtn.addEventListener("click", ()=>{
+  if(player.paused){
+    if(!currentAlbum){
+      const albumNames = Object.keys(albums);
+      const randomAlbum = albumNames[Math.floor(Math.random()*albumsNames.length)];
+      const songIndex = Math.floor(Math.random()*albums[randomAlbum].songs.length);
+      playSong(songIndex, randomAlbum);
+    } else { player.play(); }
+    playBtn.innerHTML="&#10074;&#10074;";
+  } else { player.pause(); playBtn.innerHTML="&#9654;"; }
+});
+
+document.getElementById("next").addEventListener("click", nextTrack);
+document.getElementById("prev").addEventListener("click", prevTrack);
+player.addEventListener("pause", ()=>playBtn.innerHTML="&#9654;");
+player.addEventListener("play", ()=>playBtn.innerHTML="&#10074;&#10074;");
+player.addEventListener("ended", nextTrack);
+
+// Mobile sticky player
+window.addEventListener('scroll', ()=>{
+  if(window.innerWidth > 480) return; 
+  const nowPlayingRect = nowPlaying.getBoundingClientRect();
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  const scrollBottom = document.documentElement.scrollHeight - window.innerHeight - scrollTop;
+  const distanceToNowPlayingBottom = nowPlayingRect.bottom + window.scrollY;
+
+  if(scrollBottom < 5){
+    mobilePlayer.style.position = 'absolute';
+    mobilePlayer.style.top = (distanceToNowPlayingBottom + 15) + 'px';
+    mobilePlayer.style.bottom = 'auto';
+  } else {
+    mobilePlayer.style.position = 'fixed';
+    mobilePlayer.style.bottom = '0';
+    mobilePlayer.style.top = 'auto';
+  }
 });
 </script>
 </body>
