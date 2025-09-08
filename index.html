@@ -331,12 +331,17 @@ playBtn.addEventListener("click", ()=>{
   if(player.paused){
     if(!currentAlbum){
       const albumNames = Object.keys(albums);
-      const randomAlbum = albumNames[Math.floor(Math.random()*albumsNames.length)];
-      const songIndex = Math.floor(Math.random()*albums[randomAlbum].songs.length);
+      const randomAlbum = albumNames[Math.floor(Math.random() * albumNames.length)];
+      const songIndex = Math.floor(Math.random() * albums[randomAlbum].songs.length);
       playSong(songIndex, randomAlbum);
-    } else { player.play(); }
+    } else { 
+      player.play(); 
+    }
     playBtn.innerHTML="&#10074;&#10074;";
-  } else { player.pause(); playBtn.innerHTML="&#9654;"; }
+  } else { 
+    player.pause(); 
+    playBtn.innerHTML="&#9654;"; 
+  }
 });
 
 document.getElementById("next").addEventListener("click", nextTrack);
@@ -366,3 +371,4 @@ window.addEventListener('scroll', ()=>{
 </script>
 </body>
 </html>
+
