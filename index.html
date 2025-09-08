@@ -28,7 +28,7 @@
   /* Controls wrapper */
   #controls { margin-top: 5px; display: flex; justify-content: center; gap: 20px; align-items:center; }
 
-  /* Spotify-style buttons */
+  /* Buttons (desktop & mobile look consistent) */
   .control-btn {
     width: 50px; height: 50px;
     border-radius: 50%;
@@ -50,19 +50,20 @@
     #albums { flex-direction: column; gap: 12px; align-items: center; }
     .album, .home-square { width: 90%; }
 
-    /* Home button box style for mobile */
-    .home-square { 
-      background:#222; 
-      border:1px solid #555; 
-      border-radius:6px; 
-      padding:12px; 
-      font-weight:bold; 
-      font-size:18px; 
-      color:#eee; 
-      text-align:center; 
-      width:90%; 
+    /* hide Home image on mobile and show a thin boxed label */
+    .home-square img { display: none; }
+    .home-square {
+      background:#222;
+      border:1px solid #555;
+      border-radius:6px;
+      padding:12px;
+      font-weight:bold;
+      font-size:18px;
+      color:#eee;
+      text-align:center;
+      width:90%;
+      box-sizing:border-box;
     }
-    .home-square img { display:none; }
     .home-square:hover { background:#333; }
 
     .album img { width:100%; height:auto; }
@@ -136,7 +137,7 @@ const albums = {
     {file:"Holding_on_to_you.mp3", title:"Holding on to You"}
   ]},
   "Blurryface": { cover:"Blurryface.jpg", songs:[
-    {file:"StressedOut.mp3", title:"Stressed Out"},
+    {file:"Stressed_Out.mp3", title:"Stressed Out"},
     {file:"Ride.mp3", title:"Ride"},
     {file:"Fairly_Local.mp3", title:"Fairly Local"},
     {file:"Tear_in_My_Heart.mp3", title:"Tear in My Heart"},
@@ -162,121 +163,126 @@ const playlistDiv=document.getElementById("playlist");
 const playBtn=document.getElementById("play");
 const mobilePlayer=document.getElementById("mobilePlayer");
 
-function updateMediaSession(song){
-  if('mediaSession' in navigator && currentAlbum){
-    navigator.mediaSession.metadata=new MediaMetadata({
-      title:song.title,
-      artist:currentAlbum,
-      album:currentAlbum,
-      artwork:[{src:albums[currentAlbum].cover,sizes:'300x300',type:'image/jpeg'}]
-    });
-    navigator.mediaSession.setActionHandler('play',()=>player.play());
-    navigator.mediaSession.setActionHandler('pause',()=>player.pause());
-    navigator.mediaSession.setActionHandler('previoustrack',()=>prevTrack());
-    navigator.mediaSession.setActionHandler('nexttrack',()=>nextTrack());
-  }
-}
-
-function loadAlbum(name){
-  currentAlbum=name; lastAlbum=name; currentSong=0;
-  albumTitle.textContent=name+" Album";
-  playlistDiv.innerHTML="";
-  albums[name].songs.forEach((song,index)=>{
-    const btn=document.createElement("button");
-    btn.textContent=song.title;
-    btn.addEventListener("click",()=>playSong(index));
-    playlistDiv.appendChild(btn);
-  });
-}
-
-function playSong(index, albumName=null){
-  if(albumName) currentAlbum = albumName;
-  if(!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
-  if(!currentAlbum) return;
-
-  const songs = albums[currentAlbum].songs;
-  if(index<0||index>=songs.length) return;
-  currentSong=index;
-  const song = songs[currentSong];
-  source.src=song.file;
-  player.load();
-  player.play().catch(err=>console.log("Autoplay prevented:",err));
-  playBtn.innerHTML="&#10074;&#10074;";
-  nowPlaying.textContent="Now Playing: "+song.title;
-  lastAlbum = currentAlbum;
-  updateMediaSession(song);
-}
-
-function nextTrack(){
-  if(!currentAlbum && lastAlbum) currentAlbum=lastAlbum;
-  if(!currentAlbum) return;
-  currentSong++;
-  if(currentSong>=albums[currentAlbum].songs.length) currentSong=0;
-  playSong(currentSong);
-}
-
-function prevTrack(){
-  if(!currentAlbum && lastAlbum) currentAlbum=lastAlbum;
-  if(!currentAlbum) return;
-  currentSong--;
-  if(currentSong<0) currentSong=albums[currentAlbum].songs.length-1;
-  playSong(currentSong);
-}
-
-// Home tile
-const homeSquare=document.createElement("div");
-homeSquare.className="home-square";
-homeSquare.innerHTML=`Home`;
-homeSquare.addEventListener("click",()=>{
-  playlistDiv.innerHTML="";
-  albumTitle.textContent="";
-  // Do NOT reset nowPlaying unless nothing is playing
-  if (player.paused && !currentAlbum) {
-    nowPlaying.textContent="Now Playing: None";
+// Render Home tile (image shown on desktop; hidden on mobile by CSS)
+const homeSquare = document.createElement("div");
+homeSquare.className = "home-square";
+homeSquare.innerHTML = `<img src="Home.jpg" alt="Home"><div class="album-title">Home</div>`;
+homeSquare.addEventListener("click", () => {
+  // Clear UI playlist and album title, but keep Now Playing if a song is actively playing.
+  playlistDiv.innerHTML = "";
+  albumTitle.textContent = "";
+  // only reset Now Playing if there's no active source AND the player is paused
+  if (player.paused && !player.currentSrc) {
+    nowPlaying.textContent = "Now Playing: None";
   }
 });
 albumsDiv.appendChild(homeSquare);
 
 // Album tiles
-Object.keys(albums).forEach(name=>{
-  const albumDiv=document.createElement("div");
-  albumDiv.className="album";
-  albumDiv.innerHTML=`<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
-  albumDiv.addEventListener("click",()=>loadAlbum(name));
+Object.keys(albums).forEach(name => {
+  const albumDiv = document.createElement("div");
+  albumDiv.className = "album";
+  albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
+  albumDiv.addEventListener("click", () => loadAlbum(name));
   albumsDiv.appendChild(albumDiv);
 });
 
-// Controls
-playBtn.addEventListener("click",()=>{
-  if(player.paused){
-    if(!currentAlbum){
-      // Pick random album & song on first click
+// Media session helper
+function updateMediaSession(song){
+  if ('mediaSession' in navigator && currentAlbum) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: song.title,
+      artist: currentAlbum,
+      album: currentAlbum,
+      artwork: [{ src: albums[currentAlbum].cover, sizes: '300x300', type: 'image/jpeg' }]
+    });
+    navigator.mediaSession.setActionHandler('play', () => player.play());
+    navigator.mediaSession.setActionHandler('pause', () => player.pause());
+    navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+    navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+  }
+}
+
+// Load album into playlist UI
+function loadAlbum(name){
+  currentAlbum = name;
+  lastAlbum = name;
+  currentSong = 0;
+  albumTitle.textContent = name + " Album";
+  playlistDiv.innerHTML = "";
+  albums[name].songs.forEach((song, index) => {
+    const btn = document.createElement("button");
+    btn.textContent = song.title;
+    btn.addEventListener("click", () => playSong(index));
+    playlistDiv.appendChild(btn);
+  });
+}
+
+// Play a song; optional albumName to pick album when random-playing
+function playSong(index, albumName = null){
+  if (albumName) currentAlbum = albumName;
+  if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
+  if (!currentAlbum) return;
+
+  const songs = albums[currentAlbum].songs;
+  if (index < 0 || index >= songs.length) return;
+  currentSong = index;
+  const song = songs[currentSong];
+  source.src = song.file;
+  player.load();
+  player.play().catch(err => console.log("Autoplay prevented:", err));
+  playBtn.innerHTML = "&#10074;&#10074;";
+  nowPlaying.textContent = "Now Playing: " + song.title;
+  lastAlbum = currentAlbum;
+  updateMediaSession(song);
+}
+
+function nextTrack(){
+  if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
+  if (!currentAlbum) return;
+  currentSong++;
+  if (currentSong >= albums[currentAlbum].songs.length) currentSong = 0;
+  playSong(currentSong);
+}
+
+function prevTrack(){
+  if (!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
+  if (!currentAlbum) return;
+  currentSong--;
+  if (currentSong < 0) currentSong = albums[currentAlbum].songs.length - 1;
+  playSong(currentSong);
+}
+
+// Controls wiring
+playBtn.addEventListener("click", () => {
+  if (player.paused) {
+    // If nothing selected yet, pick a random album + song
+    if (!currentAlbum) {
       const albumNames = Object.keys(albums);
-      const randomAlbum = albumNames[Math.floor(Math.random()*albumNames.length)];
-      const songIndex = Math.floor(Math.random()*albums[randomAlbum].songs.length);
+      const randomAlbum = albumNames[Math.floor(Math.random() * albumNames.length)];
+      const songIndex = Math.floor(Math.random() * albums[randomAlbum].songs.length);
       playSong(songIndex, randomAlbum);
     } else {
       player.play();
     }
-    playBtn.innerHTML="&#10074;&#10074;";
+    playBtn.innerHTML = "&#10074;&#10074;";
   } else {
     player.pause();
-    playBtn.innerHTML="&#9654;";
+    playBtn.innerHTML = "&#9654;";
   }
 });
-
 document.getElementById("next").addEventListener("click", nextTrack);
 document.getElementById("prev").addEventListener("click", prevTrack);
 
-player.addEventListener("pause",()=>playBtn.innerHTML="&#9654;");
-player.addEventListener("play",()=>playBtn.innerHTML="&#10074;&#10074;");
+player.addEventListener("pause", () => playBtn.innerHTML = "&#9654;");
+player.addEventListener("play", () => playBtn.innerHTML = "&#10074;&#10074;");
 player.addEventListener("ended", nextTrack);
 
-// Dock sticky player at bottom on scroll to page bottom
-window.addEventListener('scroll',()=>{
-  const scrollTop=window.pageYOffset||document.documentElement.scrollTop;
-  const scrollBottom=document.documentElement.scrollHeight-window.innerHeight-scrollTop;
-  if(scrollBottom<5) mobilePlayer.classList.add("docked");
+// Sticky behavior: dock only when scrolled to page bottom
+window.addEventListener('scroll', () => {
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  const scrollBottom = document.documentElement.scrollHeight - document.documentElement.clientHeight - scrollTop;
+  if (scrollBottom < 5) mobilePlayer.classList.add("docked");
   else mobilePlayer.classList.remove("docked");
 });
 </script>
