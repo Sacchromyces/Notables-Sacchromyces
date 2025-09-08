@@ -43,18 +43,20 @@
   .control-btn:hover { transform: scale(1.1); filter: brightness(1.2); }
   #play { width: 60px; height: 60px; font-size: 28px; }
 
+  /* Mobile adjustments */
   @media (max-width:480px) {
     body { padding:10px; font-size:16px; }
     h1 { font-size:24px; margin-bottom:15px; }
     #albums { flex-direction: column; gap: 15px; align-items: center; }
-    .album, .home-square { width: 90%; }
-    .album img, .home-square img { width:100%; height:auto; }
+    .album { width: 90%; }
+    .album img { width:100%; height:auto; }
     .control-btn { width:50px; height:50px; font-size:20px; }
     #play { width:60px; height:60px; font-size:28px; }
     #playlist button { width:95%; padding:12px; font-size:16px; }
     audio { width:100%; }
     #albumTitle { font-size:20px; }
 
+    /* Mobile player sticky bar */
     #mobilePlayer {
       position: fixed;
       bottom: 0;
@@ -72,6 +74,19 @@
       box-shadow: none;
     }
     #albumTitle, #playlist { margin-bottom: 90px; }
+
+    /* Replace Home image with thin text button */
+    .home-square img { display: none; }
+    .home-square {
+      width: 90%;
+      border: 1px solid #555;
+      border-radius: 5px;
+      padding: 12px;
+      background: #222;
+    }
+    .home-square .album-title {
+      margin: 0;
+    }
   }
 </style>
 </head>
@@ -210,6 +225,7 @@ homeSquare.innerHTML=`<img src="Home.jpg" alt="Home"><div class="album-title">Ho
 homeSquare.addEventListener("click",()=>{
   playlistDiv.innerHTML="";
   albumTitle.textContent="";
+  nowPlaying.textContent="Now Playing: None";
 });
 albumsDiv.appendChild(homeSquare);
 
@@ -255,7 +271,6 @@ window.addEventListener('scroll',()=>{
   if(scrollBottom<5) mobilePlayer.classList.add("docked");
   else mobilePlayer.classList.remove("docked");
 });
-
 </script>
 </body>
 </html>
