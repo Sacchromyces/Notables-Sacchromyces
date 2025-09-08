@@ -44,7 +44,7 @@
   #play { width: 60px; height: 60px; font-size: 28px; }
 
   @media (max-width:480px) {
-    body { padding:10px; font-size:16px; padding-bottom: 140px; /* extra space for sticky player */ }
+    body { padding:10px; font-size:16px; padding-bottom: 160px; /* extra space for sticky player */ }
     h1 { font-size:24px; margin-bottom:15px; }
     #albums { flex-direction: column; gap: 15px; align-items: center; }
     .album, .home-square { width: 90%; }
@@ -274,17 +274,19 @@ window.addEventListener('scroll', ()=>{
   const distanceToNowPlayingBottom = nowPlayingRect.bottom + window.scrollY;
 
   if(scrollBottom < 5){
-    // Dock fully below Now Playing
-    mobilePlayer.style.position = 'absolute';
-    mobilePlayer.style.top = (distanceToNowPlayingBottom + 10) + 'px'; // 10px gap
-    mobilePlayer.style.bottom = 'auto';
-  } else {
-    // Normal sticky sliding
-    mobilePlayer.style.position = 'fixed';
-    mobilePlayer.style.bottom = '0';
-    mobilePlayer.style.top = 'auto';
-  }
+  // Dock fully below Now Playing
+  mobilePlayer.style.position = 'absolute';
+  mobilePlayer.style.top = (distanceToNowPlayingBottom + 15) + 'px'; // +5px more gap
+  mobilePlayer.style.bottom = 'auto';
+} else {
+  // Normal sticky sliding
+  mobilePlayer.style.position = 'fixed';
+  mobilePlayer.style.bottom = '0';
+  mobilePlayer.style.top = 'auto';
+}
+
 });
 </script>
 </body>
 </html>
+
