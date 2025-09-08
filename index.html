@@ -30,8 +30,8 @@
     margin-bottom: 20px;
   }
   #mainHeader img#logo {
-    width: 40px;
-    height: 40px;
+    width: 30px;  /* desktop size */
+    height: 30px;
     object-fit: contain;
   }
   #mainHeader h1 {
@@ -117,8 +117,8 @@
     body { padding:10px; font-size:16px; padding-bottom: 160px; }
 
     #mainHeader img#logo {
-      width: 30px;
-      height: 30px;
+      width: 25px;  /* mobile size */
+      height: 25px;
     }
     #mainHeader h1 {
       font-size: 22px;
@@ -167,7 +167,7 @@
 
 <!-- Header -->
 <div id="mainHeader">
-  <img id="logo" src="Notables_Logo.jpg" alt="Notables Logo">
+  <img id="logo" src="Notables_Logo.png" alt="Notables Logo">
   <h1>Notables</h1>
 </div>
 
@@ -252,11 +252,12 @@ const mobilePlayer=document.getElementById("mobilePlayer");
 
 function updateMediaSession(song){
   if('mediaSession' in navigator && currentAlbum){
+    const ext = albums[currentAlbum].cover.split('.').pop().toLowerCase();
     navigator.mediaSession.metadata=new MediaMetadata({
       title:song.title,
       artist:currentAlbum,
       album:currentAlbum,
-      artwork:[{src:albums[currentAlbum].cover,sizes:'300x300',type:'image/jpeg'}]
+      artwork:[{src:albums[currentAlbum].cover,sizes:'300x300',type:`image/${ext}`}]
     });
     navigator.mediaSession.setActionHandler('play',()=>player.play());
     navigator.mediaSession.setActionHandler('pause',()=>player.pause());
@@ -267,7 +268,7 @@ function updateMediaSession(song){
 
 function loadAlbum(name){
   currentAlbum=name; lastAlbum=name; currentSong=0;
-  albumTitle.textContent=name+" Album";
+  albumTitle.textContent=name;
   playlistDiv.innerHTML="";
   albums[name].songs.forEach((song,index)=>{
     const btn=document.createElement("button");
