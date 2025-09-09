@@ -240,25 +240,29 @@ const albums = {
   ]}
 };
 
-let currentAlbum=null, currentSong=0, lastAlbum=null;
-const player=document.getElementById("player");
-const source=document.getElementById("source");
-const nowPlaying=document.getElementById("nowPlaying");
-const albumTitle=document.getElementById("albumTitle");
-const albumsDiv=document.getElementById("albums");
-const playlistDiv=document.getElementById("playlist");
-const playBtn=document.getElementById("play");
-const mobilePlayer=document.getElementById("mobilePlayer");
+let currentAlbum = null;
+let currentSong = 0;
+let lastAlbum = null;
 
-// Update media session for system notification / lock screen
+const player = document.getElementById("player");
+const source = document.getElementById("source");
+const nowPlaying = document.getElementById("nowPlaying");
+const albumTitle = document.getElementById("albumTitle");
+const albumsDiv = document.getElementById("albums");
+const playlistDiv = document.getElementById("playlist");
+const playBtn = document.getElementById("play");
+const mobilePlayer = document.getElementById("mobilePlayer");
+
+// Helper: update MediaSession (lock screen notifications)
 function updateMediaSession(song){
-  if('mediaSession' in navigator && currentAlbum){
-    const ext = albums[currentAlbum].cover.split('.').pop().toLowerCase();
-    navigator.mediaSession.metadata=new MediaMetadata({
-      title:song.title,
-      artist: currentAlbum,
-      album: currentAlbum,
-      artwork:[{src:albums[currentAlbum].cover, sizes:'300x300', type:`image/${ext}`}]
+  if('mediaSession' in navigator && (currentAlbum || lastAlbum)){
+    const albumKey = currentAlbum || lastAlbum;
+    const ext = albums[albumKey].cover.split('.').pop().toLowerCase();
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: song.title,
+      artist: albumKey,
+      album: albumKey,
+      artwork: [{src: albums[albumKey].cover, sizes:'300x300', type:`image/${ext}`}]
     });
     navigator.mediaSession.setActionHandler('play', ()=>player.play());
     navigator.mediaSession.setActionHandler('pause', ()=>player.pause());
@@ -267,72 +271,97 @@ function updateMediaSession(song){
   }
 }
 
+// Helper: update playlist buttons highlight
+function updatePlaylistButtons(){
+  const buttons = [...playlistDiv.querySelectorAll("button")];
+  buttons.forEach((btn, i)=>{
+    btn.classList.toggle("playing", i === currentSong);
+  });
+}
+
+// Load an album's playlist into the UI
 function loadAlbum(name){
-  currentAlbum=name; lastAlbum=name; currentSong=0;
-  albumTitle.textContent=name;
-  playlistDiv.innerHTML="";
+  currentAlbum = name;
+  lastAlbum = name;
+  currentSong = 0; // default selection when opening album
+  albumTitle.textContent = name;
+  playlistDiv.innerHTML = "";
   albums[name].songs.forEach((song,index)=>{
-    const btn=document.createElement("button");
-    btn.textContent=song.title;
+    const btn = document.createElement("button");
+    btn.textContent = song.title;
     btn.addEventListener("click", ()=>playSong(index));
     playlistDiv.appendChild(btn);
   });
+  // mark the currentSong if applicable
+  updatePlaylistButtons();
 }
 
+// Play a song (index). If albumName provided, ensure that album is loaded first so buttons exist.
 function playSong(index, albumName=null){
-  if(albumName) currentAlbum = albumName;
+  if(albumName && albumName !== currentAlbum){
+    // load album to create the playlist UI (buttons)
+    loadAlbum(albumName);
+  }
   if(!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
   if(!currentAlbum) return;
   const songs = albums[currentAlbum].songs;
-  if(index<0||index>=songs.length) return;
-  currentSong=index;
+  if(index < 0 || index >= songs.length) return;
+  currentSong = index;
   const song = songs[currentSong];
-  source.src=song.file;
+  source.src = song.file;
   player.load();
-  player.play().catch(err=>console.log("Autoplay prevented:",err));
-  playBtn.innerHTML="&#10074;&#10074;";
-  nowPlaying.textContent="Now Playing: "+song.title;
-  lastAlbum=currentAlbum;
+  player.play().catch(err => console.log("Autoplay prevented:", err));
+  playBtn.innerHTML = "&#10074;&#10074;";
+  nowPlaying.textContent = "Now Playing: " + song.title;
+  lastAlbum = currentAlbum;
   updateMediaSession(song);
-
-  // 🔹 Highlight active song
-  [...playlistDiv.querySelectorAll("button")].forEach((btn, i)=>{
-    btn.classList.toggle("playing", i === index);
-  });
+  updatePlaylistButtons();
 }
 
 function nextTrack(){
-  if(!currentAlbum && lastAlbum) currentAlbum=lastAlbum;
+  if(!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
   if(!currentAlbum) return;
   currentSong++;
-  if(currentSong>=albums[currentAlbum].songs.length) currentSong=0;
+  if(currentSong >= albums[currentAlbum].songs.length) currentSong = 0;
   playSong(currentSong);
 }
 
 function prevTrack(){
-  if(!currentAlbum && lastAlbum) currentAlbum=lastAlbum;
+  if(!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
   if(!currentAlbum) return;
   currentSong--;
-  if(currentSong<0) currentSong=albums[currentAlbum].songs.length-1;
+  if(currentSong < 0) currentSong = albums[currentAlbum].songs.length - 1;
   playSong(currentSong);
 }
 
 // Home tile
-const homeSquare=document.createElement("div");
-homeSquare.className="home-square";
-homeSquare.innerHTML=`<img src="Home.jpg" alt="Home"><div class="album-title">Home</div>`;
-homeSquare.addEventListener("click",()=>{
-  playlistDiv.innerHTML="";
-  albumTitle.textContent="";
-  nowPlaying.textContent="Now Playing: None";
+const homeSquare = document.createElement("div");
+homeSquare.className = "home-square";
+homeSquare.innerHTML = `<img src="Home.jpg" alt="Home"><div class="album-title">Home</div>`;
+homeSquare.addEventListener("click", ()=>{
+  // clear the playlist view but keep playing info if a song is loaded
+  playlistDiv.innerHTML = "";
+  albumTitle.textContent = "";
+
+  // If no source set, show None. Otherwise keep showing the currently loaded song title.
+  const srcAttr = source.getAttribute('src') || "";
+  if(!srcAttr){
+    nowPlaying.textContent = "Now Playing: None";
+  } else {
+    const albumKey = currentAlbum || lastAlbum;
+    const title = (albumKey && albums[albumKey] && albums[albumKey].songs[currentSong])
+      ? albums[albumKey].songs[currentSong].title
+      : null;
+    nowPlaying.textContent = title ? ("Now Playing: " + title) : "Now Playing: None";
+  }
 });
 albumsDiv.appendChild(homeSquare);
 
-// Album tiles
+// Album tiles (click to open)
 Object.keys(albums).forEach(name=>{
-  const albumDiv=document.createElement("div");
-  albumDiv.className="album";
-  albumDiv.innerHTML=`<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
+  const albumDiv = document.createElement("div");
+  albumDiv.className = "album";
+  albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
   albumDiv.addEventListener("click", ()=>loadAlbum(name));
   albumsDiv.appendChild(albumDiv);
 });
@@ -341,29 +370,34 @@ Object.keys(albums).forEach(name=>{
 playBtn.addEventListener("click", ()=>{
   if(player.paused){
     if(!currentAlbum){
+      // random album + song
       const albumNames = Object.keys(albums);
       const randomAlbum = albumNames[Math.floor(Math.random() * albumNames.length)];
       const songIndex = Math.floor(Math.random() * albums[randomAlbum].songs.length);
       playSong(songIndex, randomAlbum);
-    } else { 
-      player.play(); 
+    } else {
+      player.play();
     }
-    playBtn.innerHTML="&#10074;&#10074;";
-  } else { 
-    player.pause(); 
-    playBtn.innerHTML="&#9654;"; 
+    playBtn.innerHTML = "&#10074;&#10074;";
+  } else {
+    player.pause();
+    playBtn.innerHTML = "&#9654;";
   }
 });
 
 document.getElementById("next").addEventListener("click", nextTrack);
 document.getElementById("prev").addEventListener("click", prevTrack);
+
+// Keep play/pause button icon in sync
 player.addEventListener("pause", ()=>playBtn.innerHTML="&#9654;");
 player.addEventListener("play", ()=>playBtn.innerHTML="&#10074;&#10074;");
+
+// When a track ends, go to next
 player.addEventListener("ended", nextTrack);
 
-// Mobile sticky player
+// Mobile sticky player behaviour (keeps mobile player docked)
 window.addEventListener('scroll', ()=>{
-  if(window.innerWidth > 480) return; 
+  if(window.innerWidth > 480) return;
   const nowPlayingRect = nowPlaying.getBoundingClientRect();
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
   const scrollBottom = document.documentElement.scrollHeight - window.innerHeight - scrollTop;
