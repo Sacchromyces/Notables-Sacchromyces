@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Notables</title>
 
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -20,7 +20,6 @@ body {
     margin:0;
     padding:20px;
 }
-
 /* Header with circular logo */
 #mainHeader {
     display: flex;
@@ -89,9 +88,10 @@ body {
     margin-right:auto;
     transition: background 0.2s, filter 0.2s;
 }
-#playlist button:hover { background: #444; }
-
-/* 🔹 Currently playing song */
+#playlist button:hover {
+    background: #444;
+}
+/* Playing song highlight */
 #playlist button.playing {
     background: #555;
     color: #ccc;
@@ -99,7 +99,6 @@ body {
 }
 
 #nowPlaying { margin: 10px 0; font-weight: bold; }
-
 audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; background: #222; color: #eee; }
 
 #controls {
@@ -181,11 +180,39 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 
 <div id="mobilePlayer">
   <div id="controls">
-    <button id="shuffle" class="control-btn" title="Shuffle">Shuffle</button>
-    <button id="prev" class="control-btn" title="Previous">&#10094;</button>
-    <button id="play" class="control-btn" title="Play/Pause">&#9654;</button>
-    <button id="next" class="control-btn" title="Next">&#10095;</button>
-    <button id="repeat" class="control-btn" title="Repeat">Repeat</button>
+    <button id="shuffle" class="control-btn" title="Shuffle">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shuffle">
+        <polyline points="16 3 21 3 21 8"></polyline>
+        <line x1="4" y1="20" x2="21" y2="3"></line>
+        <polyline points="21 16 21 21 16 21"></polyline>
+        <line x1="15" y1="15" x2="21" y2="21"></line>
+      </svg>
+    </button>
+
+    <button id="prev" class="control-btn" title="Previous">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+
+    <button id="play" class="control-btn" title="Play/Pause">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="play-icon">&#9654;</svg>
+    </button>
+
+    <button id="next" class="control-btn" title="Next">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+
+    <button id="repeat" class="control-btn" title="Repeat">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-repeat">
+        <polyline points="17 1 21 5 17 9"></polyline>
+        <path d="M3 11V9a4 4 0 014-4h14"></path>
+        <polyline points="7 23 3 19 7 15"></polyline>
+        <path d="M21 13v2a4 4 0 01-4 4H3"></path>
+      </svg>
+    </button>
   </div>
   <audio id="player" controls>
     <source id="source" src="" type="audio/mpeg">
@@ -194,7 +221,7 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 </div>
 
 <script>
-// Albums and songs
+// --- Albums & Songs ---
 const albums = {
   "Vessel": { cover:"Vessel.jpg", songs:[
     {file:"Ode_to_Sleep.mp3", title:"Ode to Sleep"},
@@ -213,7 +240,7 @@ const albums = {
     {file:"Holding_on_to_you.mp3", title:"Holding on to You"}
   ]},
   "Blurryface": { cover:"Blurryface.jpg", songs:[
-    {file:"Stressed_Out.mp3", title:"Stressed Out"},
+    {file:"StressedOut.mp3", title:"Stressed Out"},
     {file:"Ride.mp3", title:"Ride"},
     {file:"Fairly_Local.mp3", title:"Fairly Local"},
     {file:"Tear_in_My_Heart.mp3", title:"Tear in My Heart"},
@@ -227,7 +254,7 @@ const albums = {
     {file:"Not_Today.mp3", title:"Not Today"},
     {file:"Goner.mp3", title:"Goner"}
   ]},
-  "2009 21 Pilots": { cover:"2009_21_Cover.jpg", songs:[
+  "2009 21 Pilots": { cover:"2009_21_Cover.jpg", songs: [
     {file:"Implicit_Demand_For_Proof.mp3", title:"Implicit Room For Demand"},
     {file:"Fall_Away.mp3", title:"Fall Away"},
     {file:"The_Pantaloon.mp3", title:"The Pantaloon"},
@@ -260,14 +287,15 @@ const playBtn = document.getElementById("play");
 const shuffleBtn = document.getElementById("shuffle");
 const repeatBtn = document.getElementById("repeat");
 
-// Update playlist button highlight
-function updatePlaylistButtons() {
-  [...playlistDiv.querySelectorAll("button")].forEach((btn, i) => {
+// --- Update highlight ---
+function updatePlaylistButtons(){
+  const buttons = [...playlistDiv.querySelectorAll("button")];
+  buttons.forEach((btn, i)=>{
     btn.classList.toggle("playing", i === currentSong);
   });
 }
 
-// Load album
+// --- Load album ---
 function loadAlbum(name){
   currentAlbum = name;
   lastAlbum = name;
@@ -279,11 +307,10 @@ function loadAlbum(name){
     btn.addEventListener("click", ()=>playSong(index));
     playlistDiv.appendChild(btn);
   });
-  currentSong = null;
   updatePlaylistButtons();
 }
 
-// Play song
+// --- Play song ---
 function playSong(index, albumName=null){
   if(albumName && albumName !== currentAlbum) loadAlbum(albumName);
   if(!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
@@ -295,45 +322,45 @@ function playSong(index, albumName=null){
   source.src = song.file;
   player.load();
   player.play();
-  playBtn.innerHTML = "&#10074;&#10074;";
   nowPlaying.textContent = "Now Playing: " + song.title;
-  lastAlbum = currentAlbum;
   updatePlaylistButtons();
+  playBtn.innerHTML = "&#10074;&#10074;";
 }
 
-// Next / Prev
+// --- Next/Prev ---
 function nextTrack(){
+  if(!currentAlbum) return;
+  const songs = albums[currentAlbum].songs;
+  let nextIndex;
   if(shuffle){
-    const songs = albums[currentAlbum].songs;
-    let nextIndex;
-    do { nextIndex = Math.floor(Math.random() * songs.length); } 
+    do { nextIndex = Math.floor(Math.random() * songs.length); }
     while(nextIndex === currentSong && songs.length > 1);
-    playSong(nextIndex);
   } else {
-    currentSong++;
-    if(currentSong >= albums[currentAlbum].songs.length) currentSong = 0;
-    playSong(currentSong);
+    nextIndex = currentSong + 1;
+    if(nextIndex >= songs.length) nextIndex = 0;
   }
-}
-function prevTrack(){
-  currentSong--;
-  if(currentSong < 0) currentSong = albums[currentAlbum].songs.length - 1;
-  playSong(currentSong);
+  playSong(nextIndex);
 }
 
-// Home tile
+function prevTrack(){
+  if(!currentAlbum) return;
+  const songs = albums[currentAlbum].songs;
+  let prevIndex = currentSong - 1;
+  if(prevIndex < 0) prevIndex = songs.length - 1;
+  playSong(prevIndex);
+}
+
+// --- Home tile ---
 const homeSquare = document.createElement("div");
 homeSquare.className = "home-square";
 homeSquare.innerHTML = `<img src="Home.jpg" alt="Home"><div class="album-title">Home</div>`;
 homeSquare.addEventListener("click", ()=>{
   playlistDiv.innerHTML = "";
   albumTitle.textContent = "";
-  nowPlaying.textContent = currentSong !== null ? 
-    ("Now Playing: " + albums[currentAlbum].songs[currentSong].title) : "Now Playing: None";
 });
 albumsDiv.appendChild(homeSquare);
 
-// Album tiles
+// --- Album tiles ---
 Object.keys(albums).forEach(name=>{
   const albumDiv = document.createElement("div");
   albumDiv.className = "album";
@@ -342,7 +369,7 @@ Object.keys(albums).forEach(name=>{
   albumsDiv.appendChild(albumDiv);
 });
 
-// Controls
+// --- Controls ---
 playBtn.addEventListener("click", ()=>{
   if(player.paused){
     if(currentSong === null){
@@ -361,22 +388,12 @@ playBtn.addEventListener("click", ()=>{
 });
 document.getElementById("next").addEventListener("click", nextTrack);
 document.getElementById("prev").addEventListener("click", prevTrack);
+shuffleBtn.addEventListener("click", ()=>{ shuffle = !shuffle; shuffleBtn.classList.toggle("active", shuffle); });
+repeatBtn.addEventListener("click", ()=>{ repeat = !repeat; repeatBtn.classList.toggle("active", repeat); });
 
-// Shuffle / Repeat buttons
-shuffleBtn.addEventListener("click", ()=>{
-  shuffle = !shuffle;
-  shuffleBtn.classList.toggle("active", shuffle);
-});
-repeatBtn.addEventListener("click", ()=>{
-  repeat = !repeat;
-  repeatBtn.classList.toggle("active", repeat);
-});
-
-// Keep play/pause button sync
 player.addEventListener("pause", ()=>playBtn.innerHTML="&#9654;");
 player.addEventListener("play", ()=>playBtn.innerHTML="&#10074;&#10074;");
 
-// When song ends
 player.addEventListener("ended", ()=>{
   if(repeat){
     playSong(currentSong);
@@ -385,16 +402,21 @@ player.addEventListener("ended", ()=>{
   }
 });
 
-// Mobile sticky player
+// --- Mobile sticky ---
+const mobilePlayer = document.getElementById("mobilePlayer");
 window.addEventListener('scroll', ()=>{
   if(window.innerWidth > 480) return;
-  const scrollBottom = document.documentElement.scrollHeight - window.innerHeight - window.scrollY;
+  const nowPlayingRect = nowPlaying.getBoundingClientRect();
+  const scrollBottom = document.documentElement.scrollHeight - window.innerHeight - (window.pageYOffset || document.documentElement.scrollTop);
+  const distanceToNowPlayingBottom = nowPlayingRect.bottom + window.scrollY;
   if(scrollBottom < 5){
     mobilePlayer.style.position = 'absolute';
+    mobilePlayer.style.top = (distanceToNowPlayingBottom + 15) + 'px';
     mobilePlayer.style.bottom = 'auto';
   } else {
     mobilePlayer.style.position = 'fixed';
     mobilePlayer.style.bottom = '0';
+    mobilePlayer.style.top = 'auto';
   }
 });
 </script>
