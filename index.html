@@ -87,9 +87,17 @@ body {
     width: 220px;
     margin-left:auto;
     margin-right:auto;
-    transition: background 0.2s;
+    transition: background 0.2s, filter 0.2s;
 }
 #playlist button:hover { background: #444; }
+
+/* 🔹 Playing song highlight */
+#playlist button.playing {
+    background: #555;
+    color: #ccc;
+    filter: brightness(0.8);
+}
+
 #nowPlaying { margin: 10px 0; font-weight: bold; }
 
 audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; background: #222; color: #eee; }
@@ -286,6 +294,11 @@ function playSong(index, albumName=null){
   nowPlaying.textContent="Now Playing: "+song.title;
   lastAlbum=currentAlbum;
   updateMediaSession(song);
+
+  // 🔹 Highlight active song
+  [...playlistDiv.querySelectorAll("button")].forEach((btn, i)=>{
+    btn.classList.toggle("playing", i === index);
+  });
 }
 
 function nextTrack(){
@@ -371,4 +384,3 @@ window.addEventListener('scroll', ()=>{
 </script>
 </body>
 </html>
-
