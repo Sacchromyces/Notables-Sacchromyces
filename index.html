@@ -220,7 +220,7 @@ const albums = {
     {file:"Holding_on_to_you.mp3", title:"Holding on to You"}
   ]},
   "Blurryface": { cover:"Blurryface.jpg", songs:[
-    {file:"StressedOut.mp3", title:"Stressed Out"},
+    {file:"Stressed_Out.mp3", title:"Stressed Out"},
     {file:"Ride.mp3", title:"Ride"},
     {file:"Fairly_Local.mp3", title:"Fairly Local"},
     {file:"Tear_in_My_Heart.mp3", title:"Tear in My Heart"},
@@ -268,13 +268,20 @@ const shuffleBtn = document.getElementById("shuffle");
 const repeatBtn = document.getElementById("repeat");
 const mobilePlayer = document.getElementById("mobilePlayer");
 
-// Update playlist highlight — only highlight the song that is actually playing
+//// Update playlist highlight — only the currently playing song is greyed out
 function updatePlaylistButtons(){
   const buttons = [...playlistDiv.querySelectorAll("button")];
   buttons.forEach((btn, i)=>{
-    const isPlaying = currentSong !== null && player.src.includes(albums[currentAlbum].songs[currentSong].file);
-    btn.classList.toggle("playing", i === currentSong && isPlaying);
+    // Grey out only the currently playing song
+    btn.classList.toggle("playing", i === currentSong && !player.paused);
   });
+}
+
+// Call updatePlaylistButtons whenever a song is played, paused, or changed
+player.addEventListener("play", updatePlaylistButtons);
+player.addEventListener("pause", updatePlaylistButtons);
+player.addEventListener("ended", updatePlaylistButtons);
+
 }
 
 // Load album — no song highlighted until played
@@ -422,3 +429,4 @@ window.addEventListener('scroll', ()=>{
 </script>
 </body>
 </html>
+
