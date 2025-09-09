@@ -106,7 +106,7 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     margin-top: 10px;
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 15px;
     align-items:center;
 }
 .control-btn {
@@ -121,6 +121,7 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     transition: transform 0.2s, filter 0.2s;
 }
 .control-btn:hover { transform: scale(1.1); filter: brightness(1.2); }
+.control-btn.active { background:#666; filter:brightness(1.3); }
 #play { width: 60px; height: 60px; font-size: 28px; }
 
 @media (max-width:480px) {
@@ -180,9 +181,19 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 
 <div id="mobilePlayer">
   <div id="controls">
+    <!-- Shuffle SVG -->
+    <button id="shuffle" class="control-btn" title="Shuffle">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shuffle"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line></svg>
+    </button>
+
     <button id="prev" class="control-btn" title="Previous">&#10094;</button>
     <button id="play" class="control-btn" title="Play/Pause">&#9654;</button>
     <button id="next" class="control-btn" title="Next">&#10095;</button>
+
+    <!-- Repeat SVG -->
+    <button id="repeat" class="control-btn" title="Repeat">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-repeat"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 014-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 01-4 4H3"></path></svg>
+    </button>
   </div>
   <audio id="player" controls>
     <source id="source" src="" type="audio/mpeg">
@@ -209,7 +220,7 @@ const albums = {
     {file:"Holding_on_to_you.mp3", title:"Holding on to You"}
   ]},
   "Blurryface": { cover:"Blurryface.jpg", songs:[
-    {file:"Stressed_Out.mp3", title:"Stressed Out"},
+    {file:"StressedOut.mp3", title:"Stressed Out"},
     {file:"Ride.mp3", title:"Ride"},
     {file:"Fairly_Local.mp3", title:"Fairly Local"},
     {file:"Tear_in_My_Heart.mp3", title:"Tear in My Heart"},
@@ -241,8 +252,10 @@ const albums = {
 };
 
 let currentAlbum = null;
-let currentSong = 0;
+let currentSong = null; // null by default
 let lastAlbum = null;
+let shuffle = false;
+let repeat = false;
 
 const player = document.getElementById("player");
 const source = document.getElementById("source");
@@ -251,18 +264,161 @@ const albumTitle = document.getElementById("albumTitle");
 const albumsDiv = document.getElementById("albums");
 const playlistDiv = document.getElementById("playlist");
 const playBtn = document.getElementById("play");
+const shuffleBtn = document.getElementById("shuffle");
+const repeatBtn = document.getElementById("repeat");
 const mobilePlayer = document.getElementById("mobilePlayer");
 
-// 🔹 Update playlist highlight: only the current song
+// Update playlist highlight — only highlight the song that is actually playing
 function updatePlaylistButtons(){
   const buttons = [...playlistDiv.querySelectorAll("button")];
   buttons.forEach((btn, i)=>{
-    btn.classList.toggle("playing", i === currentSong);
+    const isPlaying = currentSong !== null && player.src.includes(albums[currentAlbum].songs[currentSong].file);
+    btn.classList.toggle("playing", i === currentSong && isPlaying);
   });
 }
 
-// rest of your logic (loadAlbum, playSong, nextTrack, prevTrack, controls, mobile behavior)
-// — unchanged from your original code
+// Load album — no song highlighted until played
+function loadAlbum(name){
+  currentAlbum = name;
+  lastAlbum = name;
+  albumTitle.textContent = name;
+  playlistDiv.innerHTML = "";
+  albums[name].songs.forEach((song,index)=>{
+    const btn = document.createElement("button");
+    btn.textContent = song.title;
+    btn.addEventListener("click", ()=>playSong(index));
+    playlistDiv.appendChild(btn);
+  });
+  currentSong = null; // reset current song
+  updatePlaylistButtons();
+}
+
+// Play song
+function playSong(index, albumName=null){
+  if(albumName && albumName !== currentAlbum) loadAlbum(albumName);
+  if(!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
+  if(!currentAlbum) return;
+  const songs = albums[currentAlbum].songs;
+  if(index < 0 || index >= songs.length) return;
+  currentSong = index;
+  const song = songs[currentSong];
+  source.src = song.file;
+  player.load();
+  player.play();
+  playBtn.innerHTML = "&#10074;&#10074;";
+  nowPlaying.textContent = "Now Playing: " + song.title;
+  lastAlbum = currentAlbum;
+  updatePlaylistButtons();
+}
+
+// Next / Prev
+function nextTrack(){
+  if(shuffle){
+    const songs = albums[currentAlbum].songs;
+    let nextIndex;
+    do { nextIndex = Math.floor(Math.random() * songs.length); } 
+    while(nextIndex === currentSong && songs.length > 1);
+    playSong(nextIndex);
+  } else {
+    currentSong++;
+    if(currentSong >= albums[currentAlbum].songs.length) currentSong = 0;
+    playSong(currentSong);
+  }
+}
+function prevTrack(){
+  currentSong--;
+  if(currentSong < 0) currentSong = albums[currentAlbum].songs.length - 1;
+  playSong(currentSong);
+}
+
+// Home tile
+const homeSquare = document.createElement("div");
+homeSquare.className = "home-square";
+homeSquare.innerHTML = `<img src="Home.jpg" alt="Home"><div class="album-title">Home</div>`;
+homeSquare.addEventListener("click", ()=>{
+  playlistDiv.innerHTML = "";
+  albumTitle.textContent = "";
+  const srcAttr = source.getAttribute('src') || "";
+  if(!srcAttr){
+    nowPlaying.textContent = "Now Playing: None";
+  } else {
+    const albumKey = currentAlbum || lastAlbum;
+    const title = (albumKey && albums[albumKey] && albums[albumKey].songs[currentSong])
+      ? albums[albumKey].songs[currentSong].title
+      : null;
+    nowPlaying.textContent = title ? ("Now Playing: " + title) : "Now Playing: None";
+  }
+});
+albumsDiv.appendChild(homeSquare);
+
+// Album tiles
+Object.keys(albums).forEach(name=>{
+  const albumDiv = document.createElement("div");
+  albumDiv.className = "album";
+  albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
+  albumDiv.addEventListener("click", ()=>loadAlbum(name));
+  albumsDiv.appendChild(albumDiv);
+});
+
+// Controls
+playBtn.addEventListener("click", ()=>{
+  if(player.paused){
+    if(currentSong === null){
+      const albumNames = Object.keys(albums);
+      const randomAlbum = albumNames[Math.floor(Math.random() * albumNames.length)];
+      const songIndex = Math.floor(Math.random() * albums[randomAlbum].songs.length);
+      playSong(songIndex, randomAlbum);
+    } else {
+      player.play();
+    }
+    playBtn.innerHTML = "&#10074;&#10074;";
+  } else {
+    player.pause();
+    playBtn.innerHTML = "&#9654;";
+  }
+});
+document.getElementById("next").addEventListener("click", nextTrack);
+document.getElementById("prev").addEventListener("click", prevTrack);
+
+// Shuffle / Repeat buttons
+shuffleBtn.addEventListener("click", ()=>{
+  shuffle = !shuffle;
+  shuffleBtn.classList.toggle("active", shuffle);
+});
+repeatBtn.addEventListener("click", ()=>{
+  repeat = !repeat;
+  repeatBtn.classList.toggle("active", repeat);
+});
+
+// Keep play/pause button sync
+player.addEventListener("pause", ()=>playBtn.innerHTML="&#9654;");
+player.addEventListener("play", ()=>playBtn.innerHTML="&#10074;&#10074;");
+
+// When song ends
+player.addEventListener("ended", ()=>{
+  if(repeat){
+    playSong(currentSong);
+  } else {
+    nextTrack();
+  }
+});
+
+// Mobile sticky player
+window.addEventListener('scroll', ()=>{
+  if(window.innerWidth > 480) return;
+  const nowPlayingRect = nowPlaying.getBoundingClientRect();
+  const scrollBottom = document.documentElement.scrollHeight - window.innerHeight - (window.pageYOffset || document.documentElement.scrollTop);
+  const distanceToNowPlayingBottom = nowPlayingRect.bottom + window.scrollY;
+  if(scrollBottom < 5){
+    mobilePlayer.style.position = 'absolute';
+    mobilePlayer.style.top = (distanceToNowPlayingBottom + 15) + 'px';
+    mobilePlayer.style.bottom = 'auto';
+  } else {
+    mobilePlayer.style.position = 'fixed';
+    mobilePlayer.style.bottom = '0';
+    mobilePlayer.style.top = 'auto';
+  }
+});
 </script>
 </body>
 </html>
