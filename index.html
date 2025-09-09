@@ -30,10 +30,10 @@ body {
     margin-bottom: 20px;
 }
 #mainHeader img#logo {
-    width: 50px; /* desktop size */
+    width: 50px;
     height: 50px;
     object-fit: cover;
-    border-radius: 50%;  /* circular */
+    border-radius: 50%;
 }
 #mainHeader h1 {
     margin: 0;
@@ -91,7 +91,7 @@ body {
 }
 #playlist button:hover { background: #444; }
 
-/* 🔹 Playing song highlight */
+/* 🔹 Playing song highlight (works on desktop + mobile) */
 #playlist button.playing {
     background: #555;
     color: #ccc;
@@ -324,9 +324,7 @@ homeSquare.innerHTML=`<img src="Home.jpg" alt="Home"><div class="album-title">Ho
 homeSquare.addEventListener("click",()=>{
   playlistDiv.innerHTML="";
   albumTitle.textContent="";
-  if(!currentAlbum && player.paused){
-    nowPlaying.textContent="Now Playing: None";
-  }
+  nowPlaying.textContent="Now Playing: None";
 });
 albumsDiv.appendChild(homeSquare);
 
