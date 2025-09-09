@@ -240,7 +240,7 @@ const albums = {
     {file:"Holding_on_to_you.mp3", title:"Holding on to You"}
   ]},
   "Blurryface": { cover:"Blurryface.jpg", songs:[
-    {file:"StressedOut.mp3", title:"Stressed Out"},
+    {file:"Stressed_Out.mp3", title:"Stressed Out"},
     {file:"Ride.mp3", title:"Ride"},
     {file:"Fairly_Local.mp3", title:"Fairly Local"},
     {file:"Tear_in_My_Heart.mp3", title:"Tear in My Heart"},
@@ -287,11 +287,14 @@ const playBtn = document.getElementById("play");
 const shuffleBtn = document.getElementById("shuffle");
 const repeatBtn = document.getElementById("repeat");
 
-// --- Update highlight ---
+// Update playlist highlight — only highlight the song that is actually playing in the current playlist
 function updatePlaylistButtons(){
   const buttons = [...playlistDiv.querySelectorAll("button")];
-  buttons.forEach((btn, i)=>{
-    btn.classList.toggle("playing", i === currentSong);
+  buttons.forEach((btn, i) => {
+    const isPlaying = currentSong !== null 
+                      && currentAlbum !== null
+                      && player.src.endsWith(albums[currentAlbum].songs[currentSong].file);
+    btn.classList.toggle("playing", i === currentSong && isPlaying);
   });
 }
 
@@ -419,6 +422,11 @@ window.addEventListener('scroll', ()=>{
     mobilePlayer.style.top = 'auto';
   }
 });
+
+    // Initialize play button symbol on page load
+playBtn.innerHTML = "&#9654;"; // ►
+
 </script>
 </body>
 </html>
+
