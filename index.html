@@ -291,10 +291,9 @@ const repeatBtn = document.getElementById("repeat");
 function updatePlaylistButtons(){
   const buttons = [...playlistDiv.querySelectorAll("button")];
   buttons.forEach((btn, i) => {
-    const isPlaying = currentSong !== null 
-                      && currentAlbum !== null
-                      && player.src.endsWith(albums[currentAlbum].songs[currentSong].file);
-    btn.classList.toggle("playing", i === currentSong && isPlaying);
+    // Only highlight if this is the current album AND this is the current song
+    const isCurrentSong = currentSong === i && currentAlbum !== null && albums[currentAlbum].songs[currentSong].file === source.src.split('/').pop();
+    btn.classList.toggle("playing", isCurrentSong);
   });
 }
 
@@ -429,4 +428,5 @@ playBtn.innerHTML = "&#9654;"; // ►
 </script>
 </body>
 </html>
+
 
