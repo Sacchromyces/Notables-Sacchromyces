@@ -321,15 +321,37 @@ function loadAlbum(name){
 }
 
 // --- Play song ---
-function playSong(index, albumName=null){
+async function playSong(index, albumName=null){
   if(albumName && albumName !== currentAlbum) loadAlbum(albumName);
   if(!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
   if(!currentAlbum) return;
+
   const songs = albums[currentAlbum].songs;
   if(index < 0 || index >= songs.length) return;
+
   currentSong = index;
   const song = songs[currentSong];
-  source.src = song.file;
+
+  // 🔹 Try to get the song from cache
+  if('caches' in window) {
+    try {
+      const cache = await caches.open('notables-cache-v1');
+      const response = await cache.match('/' + song.file);
+      if(response) {
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        source.src = blobUrl;
+      } else {
+        source.src = song.file; // fallback to normal path
+      }
+    } catch(e) {
+      console.error('Error fetching from cache:', e);
+      source.src = song.file; // fallback
+    }
+  } else {
+    source.src = song.file; // fallback if caches not supported
+  }
+
   player.load();
   player.play();
   nowPlaying.textContent = "Now Playing: " + song.title;
@@ -442,6 +464,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
