@@ -332,15 +332,17 @@ async function playSong(index, albumName=null){
   currentSong = index;
   const song = songs[currentSong];
 
-  // Attempt to get the song from cache
-  let songUrl = song.file; // fallback
+  // Default to original URL
+  let songUrl = song.file;
+
+  // Try offline cache
   if('caches' in window) {
     try {
       const cache = await caches.open('notables-cache-v1');
       const response = await cache.match('/' + song.file);
       if(response){
         const blob = await response.blob();
-        songUrl = URL.createObjectURL(blob);
+        songUrl = URL.createObjectURL(blob); // For playback
       }
     } catch(e){
       console.error('Cache fetch error:', e);
@@ -355,17 +357,13 @@ async function playSong(index, albumName=null){
   updatePlaylistButtons();
   playBtn.innerHTML = "&#10074;&#10074;";
 
-  // Media Session (lock screen / notification)
+  // Media Session metadata (use original HTTPS URL, not blob)
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: song.title,
       artist: currentAlbum,
       album: currentAlbum,
-      artwork: [
-        { src: albums[currentAlbum].cover, sizes: '200x200', type: 'image/jpeg' },
-        { src: albums[currentAlbum].cover, sizes: '96x96',   type: 'image/jpeg' },
-        { src: albums[currentAlbum].cover, sizes: '512x512', type: 'image/jpeg' }
-      ]
+      artwork: [{ src: 'https://sacchromyces.github.io/Albums/' + albums[currentAlbum].cover, sizes:'200x200', type:'image/jpeg'}]
     });
 
     navigator.mediaSession.setActionHandler('play',  () => { player.play(); });
@@ -480,6 +478,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
