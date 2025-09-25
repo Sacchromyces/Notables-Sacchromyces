@@ -303,12 +303,20 @@ function loadAlbum(name){
   lastAlbum = name;
   albumTitle.textContent = name;
   playlistDiv.innerHTML = "";
+
   albums[name].songs.forEach((song,index)=>{
+    // create playlist button
     const btn = document.createElement("button");
     btn.textContent = song.title;
     btn.addEventListener("click", ()=>playSong(index));
     playlistDiv.appendChild(btn);
+
+    // 🔹 preload audio in the background
+    const audio = new Audio();
+    audio.src = song.file;
+    audio.preload = "auto";
   });
+
   updatePlaylistButtons();
 }
 
@@ -428,5 +436,6 @@ playBtn.innerHTML = "&#9654;"; // ►
 </script>
 </body>
 </html>
+
 
 
