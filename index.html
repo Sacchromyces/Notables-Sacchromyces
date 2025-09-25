@@ -432,10 +432,17 @@ window.addEventListener('scroll', ()=>{
 
     // Initialize play button symbol on page load
 playBtn.innerHTML = "&#9654;"; // ►
+    
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+    .then(() => console.log("Service Worker registered"))
+    .catch(err => console.error("SW registration failed:", err));
+}
 
 </script>
 </body>
 </html>
+
 
 
 
