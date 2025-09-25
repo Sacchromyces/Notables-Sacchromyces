@@ -332,33 +332,30 @@ async function playSong(index, albumName=null){
   currentSong = index;
   const song = songs[currentSong];
 
-  // 🔹 Try to get the song from cache
+  // Attempt to get the song from cache
+  let songUrl = song.file; // fallback
   if('caches' in window) {
     try {
       const cache = await caches.open('notables-cache-v1');
       const response = await cache.match('/' + song.file);
-      if(response) {
+      if(response){
         const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        source.src = blobUrl;
-      } else {
-        source.src = song.file; // fallback to normal path
+        songUrl = URL.createObjectURL(blob);
       }
-    } catch(e) {
-      console.error('Error fetching from cache:', e);
-      source.src = song.file; // fallback
+    } catch(e){
+      console.error('Cache fetch error:', e);
     }
-  } else {
-    source.src = song.file; // fallback if caches not supported
   }
 
+  // Set source and play
+  source.src = songUrl;
   player.load();
   player.play();
   nowPlaying.textContent = "Now Playing: " + song.title;
   updatePlaylistButtons();
   playBtn.innerHTML = "&#10074;&#10074;";
 
- player.addEventListener('loadedmetadata', () => {
+  // Media Session (lock screen / notification)
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: song.title,
@@ -366,7 +363,7 @@ async function playSong(index, albumName=null){
       album: currentAlbum,
       artwork: [
         { src: albums[currentAlbum].cover, sizes: '200x200', type: 'image/jpeg' },
-        { src: albums[currentAlbum].cover, sizes: '96x96', type: 'image/jpeg' },
+        { src: albums[currentAlbum].cover, sizes: '96x96',   type: 'image/jpeg' },
         { src: albums[currentAlbum].cover, sizes: '512x512', type: 'image/jpeg' }
       ]
     });
@@ -376,8 +373,6 @@ async function playSong(index, albumName=null){
     navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
     navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
   }
-}, { once: true });
-
 }
 
 // --- Next/Prev ---
@@ -485,6 +480,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
