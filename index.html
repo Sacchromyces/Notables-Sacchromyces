@@ -358,22 +358,25 @@ async function playSong(index, albumName=null){
   updatePlaylistButtons();
   playBtn.innerHTML = "&#10074;&#10074;";
 
-    if ('mediaSession' in navigator) {
-  navigator.mediaSession.metadata = new MediaMetadata({
-    title: song.title,
-    artist: currentAlbum,
-    album: currentAlbum,
-    artwork: [
-      { src: albums[currentAlbum].cover,   sizes: '200x200', type: 'image/jpeg' },
-      { src: albums[currentAlbum].cover,   sizes: '96x96',   type: 'image/jpeg' },
-      { src: albums[currentAlbum].cover,   sizes: '512x512', type: 'image/jpeg' }
-    ]
-  });
+ player.addEventListener('loadedmetadata', () => {
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: song.title,
+      artist: currentAlbum,
+      album: currentAlbum,
+      artwork: [
+        { src: albums[currentAlbum].cover, sizes: '200x200', type: 'image/jpeg' },
+        { src: albums[currentAlbum].cover, sizes: '96x96', type: 'image/jpeg' },
+        { src: albums[currentAlbum].cover, sizes: '512x512', type: 'image/jpeg' }
+      ]
+    });
 
-  navigator.mediaSession.setActionHandler('play',  () => { player.play(); });
-  navigator.mediaSession.setActionHandler('pause', () => { player.pause(); });
-  navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
-  navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
+    navigator.mediaSession.setActionHandler('play',  () => { player.play(); });
+    navigator.mediaSession.setActionHandler('pause', () => { player.pause(); });
+    navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
+    navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
+  }
+}, { once: true });
 
 }
 
@@ -482,6 +485,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
