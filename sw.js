@@ -81,6 +81,32 @@ const FILES_TO_CACHE = [
   "Cut_My_Lip.mp3", 
   "Pet_Cheetah.mp3", 
   "Legend.mp3"
+
+  // Downstairs album
+  "On_My_Own.mp3",
+  "Points_Of_Authority.mp3",
+  "Hit_The_Floor.mp3",
+  "Give_It_Away.mp3",
+  "Breaking_the_Silence.mp3",
+  "Would.mp3",
+  "Down_In_A_Hole.mp3",
+  "Usurper.mp3",
+  "Polyphia.mp3",
+  "Doom.mp3",
+  "Saccharine.mp3",
+  "Do_You_Call_My_Name.mp3",
+  "The_Outsider.mp3",
+  "A_Place_For_My_Head.mp3",
+  "Remember_The_Name.mp3"
+
+  // Upstairs album
+  "Have_You_Ever_Seen_The_Rain.mp3",
+  "Send_Me_On_My_Way.mp3",
+  "Life_Is_A_Highway.mp3",
+  "Right_There.mp3",
+  "High_On_Life.mp3",
+  "Monks.mp3",
+  "Blue_Rooms.mp3"
 ];
 
 // Install service worker → cache files
@@ -96,6 +122,7 @@ self.addEventListener("fetch", event => {
     caches.match(event.request).then(response => response || fetch(event.request))
   );
 });
+
 
 
 
