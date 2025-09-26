@@ -146,10 +146,11 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     }
 
     /* Make album images fill container uniformly */
-    .album img, .home-square img {
-        width: 100%;
-        height: auto;
-        border-radius: 10px;
+   .album img {
+    width: 100%;
+    height: 200px; /* fixed height for all albums */
+    object-fit: cover; /* crops image to fill container uniformly */
+    border-radius: 10px;
     }
 
     .control-btn { width: 50px; height: 50px; font-size: 20px; }
@@ -319,8 +320,17 @@ const albums = {
     {file: "Cut_My_Lip.mp3", title: "Cut My Lip"},
     {file: "Pet_Cheetah.mp3", title: "Pet Cheetah"},
     {file: "Legend.mp3", title: "Legend"}
-      ]},
-    "Downstairs": { cover:"Downstairs.jpg", songs: [
+]},
+ "Upstairs": { cover:"Upstairs.jpg", songs: [
+     {file: "Have_You_Ever_Seen_The_Rain.mp3", title: "Have You Ever Seen The Rain"},
+     {file: "Send_Me_On_My_Way.mp3", title: "Send Me On My Way"},
+     {file: "Life_Is_A_Highway.mp3", title: "Life Is A Highway"},
+     {file: "Right_There.mp3", title: "Right There"},
+     {file: "High_On_Life.mp3", title: "High On Life"},
+     {file: "Monks.mp3", title: "Monks"},
+     {file: "Blue_Rooms.mp3", title: "Blue Rooms"}
+ ]},   
+ "Downstairs": { cover:"Downstairs.jpg", songs: [
     {file: "On_My_Own.mp3", title: "On My Own"},
     {file: "Points_Of_Authority.mp3", title: "Points Of Authority"},
     {file: "Hit_The_Floor.mp3", title: "Hit The Floor"},
@@ -336,16 +346,7 @@ const albums = {
     {file: "The_Outsider.mp3", title: "The Outsider"},
     {file: "A_Place_For_My_Head.mp3", title: "A Place For My Head"},
     {file: "Remember_The_Name.mp3", title: "Remember The Name"}
-     ]},
-    "Upstairs": { cover:"Upstairs.jpg", songs: [
-     {file: "Have_You_Ever_Seen_The_Rain.mp3", title: "Have You Ever Seen The Rain"},
-     {file: "Send_Me_On_My_Way.mp3", title: "Send Me On My Way"},
-     {file: "Life_Is_A_Highway.mp3", title: "Life Is A Highway"},
-     {file: "Right_There.mp3", title: "Right There"},
-     {file: "High_On_Life.mp3", title: "High On Life"},
-     {file: "Monks.mp3", title: "Monks"},
-     {file: "Blue_Rooms.mp3", title: "Blue Rooms"}
-  ]}
+ ]}
 };
 
     
@@ -552,6 +553,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
