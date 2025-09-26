@@ -12,6 +12,7 @@ const CORE_ASSETS = [
   '/blurryface.jpg',
   '/home.jpg',
   '/TwentyOne_Pilots.jpg"
+  '/Downstairs.jpg"
 ];
 
 // --- Install: cache core assets only ---
@@ -57,4 +58,5 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
 
