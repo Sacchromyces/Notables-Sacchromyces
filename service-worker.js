@@ -10,7 +10,8 @@ const CORE_ASSETS = [
   '/favicon-16x16.png',
   '/vessel.jpg',
   '/blurryface.jpg',
-  '/home.jpg'
+  '/home.jpg',
+  '/TwentyOne_Pilots.jpg"
 ];
 
 // --- Install: cache core assets only ---
@@ -56,3 +57,4 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
