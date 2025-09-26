@@ -54,6 +54,33 @@ const FILES_TO_CACHE = [
   "Taxi_Cab.mp3",
   "Before_You_Start_Your_Day.mp3",
   "Isle_of_Flightless_Birds.mp3"
+
+  // Twentyøne Piløts album
+  "The_Outside.mp3,
+  "City_Walls.mp3",
+  "Tally.mp3",
+  "Rawfear.mp3",
+  "One_Way.mp3", 
+  "Cottonwood.mp3", 
+  "Downstairs.mp3", 
+  "Robot_Voices.mp3",
+  "Center_Mass.mp3",
+  "Intentions.mp3",
+  "Backslide.mp3",
+  "Vignette.mp3",
+  "Lavish.mp3",
+  "Snap_Back.mp3", 
+  "Oldies_Station.mp3",
+  "Good_Day.mp3", 
+  "Jumpsuit.mp3",
+  "Levitate.mp3",
+  "Morph.mp3", 
+  "Smithereens.mp3",
+  "Neon_Gravestones.mp3", 
+  "Nico_And_The_Niners.mp3",
+  "Cut_My_Lip.mp3", 
+  "Pet_Cheetah.mp3", 
+  "Legend.mp3"
 ];
 
 // Install service worker → cache files
@@ -69,4 +96,5 @@ self.addEventListener("fetch", event => {
     caches.match(event.request).then(response => response || fetch(event.request))
   );
 });
+
 
