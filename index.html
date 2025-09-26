@@ -14,7 +14,7 @@
 <style>
 body {
     font-family: sans-serif;
-  background: linear-gradient(135deg, #111 0%, #222 50%, #111 100%);
+    background: linear-gradient(135deg, #111 0%, #222 50%, #111 100%);
     color: #eee;
     text-align: center;
     margin:0;
@@ -41,14 +41,22 @@ body {
 }
 
 #albums {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 25px;
-    margin-bottom: 20px;
-    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.album-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    max-width: 1200px; /* optional, keeps row centered */
 }
 
 .album, .home-square {
+    flex: 0 0 180px; /* fixed width for each album */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -57,12 +65,10 @@ body {
 
 .album img, .home-square img {
     width: 100%;
-    aspect-ratio: 1 / 1; /* keeps it square */
+    aspect-ratio: 1/1;
     object-fit: cover;
     border-radius: 12px;
     border: 2px solid #555;
-    margin-bottom: 10px;
-    transition: transform 0.2s;
 }
 .album img:hover, .home-square img:hover {
     transform: scale(1.05);
@@ -199,7 +205,16 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
   <h1>Notables</h1>
 </div>
 
-<div id="albums"></div>
+<div id="albums">
+  <div class="home-square">
+    <img src="Home.jpg" alt="Home">
+    <div class="album-title">Home</div>
+  </div>
+  <div class="album-row">
+    <!-- Album tiles will go here -->
+  </div>
+</div>
+
 <h2 id="albumTitle"></h2>
 <div id="playerArea">
   <div id="playlist"></div>
@@ -484,12 +499,15 @@ homeSquare.addEventListener("click", ()=>{
 albumsDiv.appendChild(homeSquare);
 
 // --- Album tiles ---
+const albumRow = document.querySelector(".album-row");
+
 Object.keys(albums).forEach(name=>{
   const albumDiv = document.createElement("div");
   albumDiv.className = "album";
   albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
   albumDiv.addEventListener("click", ()=>loadAlbum(name));
-  albumsDiv.appendChild(albumDiv);
+  albumRow.appendChild(albumDiv);
+
 });
 
 // --- Controls ---
@@ -555,6 +573,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
