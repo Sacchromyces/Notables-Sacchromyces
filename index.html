@@ -124,17 +124,40 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 #play { width: 60px; height: 60px; font-size: 28px; }
 
 @media (max-width:480px) {
-    body { padding:10px; font-size:16px; padding-bottom: 160px; }
+    body {
+        padding: 10px;
+        font-size: 16px;
+        padding-bottom: 160px;
+    }
+
     #mainHeader img#logo { width: 30px; height: 30px; }
     #mainHeader h1 { font-size: 22px; }
-    #albums { flex-direction: column; gap: 15px; align-items: center; }
-    .album, .home-square { width: 90%; }
-    .album img, .home-square img { width:100%; height:auto; }
-    .control-btn { width:50px; height:50px; font-size:20px; }
-    #play { width:60px; height:60px; font-size:28px; }
-    #playlist button { width:95%; padding:12px; font-size:16px; }
-    audio { width:100%; }
-    #albumTitle { font-size:20px; }
+
+    #albums {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+
+    /* Make all album containers same width */
+    .album, .home-square {
+        width: 90%;
+        box-sizing: border-box;
+    }
+
+    /* Make album images fill container uniformly */
+    .album img, .home-square img {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+    }
+
+    .control-btn { width: 50px; height: 50px; font-size: 20px; }
+    #play { width: 60px; height: 60px; font-size: 28px; }
+    #playlist button { width: 95%; padding: 12px; font-size: 16px; }
+    audio { width: 100%; }
+    #albumTitle { font-size: 20px; }
+
     #mobilePlayer {
         position: fixed;
         left: 0;
@@ -145,22 +168,24 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
         z-index: 9999;
         transition: all 0.3s ease;
     }
+
     #mobilePlayer.docked { position: absolute; box-shadow: none; }
     #albumTitle, #playlist { margin-bottom: 20px; }
+
+    /* Home square tweaks */
     .home-square img { display: none; }
     .home-square {
-        background:#222;
-        border:1px solid #555;
-        border-radius:6px;
-        padding:12px;
-        font-weight:bold;
-        font-size:18px;
-        color:#eee;
-        text-align:center;
-        width:90%;
-        box-sizing:border-box;
+        background: #222;
+        border: 1px solid #555;
+        border-radius: 6px;
+        padding: 12px;
+        font-weight: bold;
+        font-size: 18px;
+        color: #eee;
+        text-align: center;
+        width: 90%;
     }
-    .home-square:hover { background:#333; }
+    .home-square:hover { background: #333; }
 }
 </style>
 </head>
@@ -508,6 +533,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
