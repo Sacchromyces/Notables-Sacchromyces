@@ -81,14 +81,16 @@ body {
 
 /* Focus & blur effect */
 .album.focused {
-    transform: scale(1.5);
+    transform: scale(1.5); /* enlarges the clicked album */
     z-index: 10;
     filter: none;
+    transition: transform 0.5s ease, filter 0.5s ease;
 }
 .album.minimized {
-    filter: blur(4px) brightness(0.5);
-    transform: scale(0.9);
+    filter: blur(4px) brightness(0.5); /* blurs the other albums */
+    transform: scale(1); /* keep their original size */
     pointer-events: none;
+    transition: transform 0.5s ease, filter 0.5s ease;
 }
 
 #playerArea {
@@ -492,20 +494,20 @@ Object.keys(albums).forEach(name=>{
   albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
 
   albumDiv.addEventListener("click", ()=> {
-    // Focus clicked album
     document.querySelectorAll(".album").forEach(div=>{
-      if(div === albumDiv){
-        div.classList.add("focused");
-        div.classList.remove("minimized");
-        div.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-      } else {
-        div.classList.add("minimized");
-        div.classList.remove("focused");
-      }
+        if(div === albumDiv){
+            div.classList.add("focused");
+            div.classList.remove("minimized");
+            div.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        } else {
+            div.classList.add("minimized");
+            div.classList.remove("focused");
+        }
     });
 
     loadAlbum(name);
-  });
+});
+
 
   albumsDiv.appendChild(albumDiv);
 });
@@ -563,3 +565,4 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
