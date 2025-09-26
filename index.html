@@ -81,16 +81,15 @@ body {
 
 /* Focus & blur effect */
 .album.focused {
-    transform: scale(1.5); /* enlarges the clicked album */
+    transform: scale(1.2); /* slightly bigger than normal */
     z-index: 10;
     filter: none;
-    transition: transform 0.5s ease, filter 0.5s ease;
+    transition: transform 0.4s ease, filter 0.4s ease;
 }
 .album.minimized {
-    filter: blur(4px) brightness(0.5); /* blurs the other albums */
-    transform: scale(1); /* keep their original size */
+    filter: blur(3px) brightness(0.6); /* blur and dim other albums */
     pointer-events: none;
-    transition: transform 0.5s ease, filter 0.5s ease;
+    transition: transform 0.4s ease, filter 0.4s ease;
 }
 
 #playerArea {
@@ -493,8 +492,8 @@ Object.keys(albums).forEach(name=>{
   albumDiv.className = "album";
   albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
 
-  albumDiv.addEventListener("click", ()=> {
-    document.querySelectorAll(".album").forEach(div=>{
+albumDiv.addEventListener("click", () => {
+    document.querySelectorAll(".album").forEach(div => {
         if(div === albumDiv){
             div.classList.add("focused");
             div.classList.remove("minimized");
@@ -507,6 +506,7 @@ Object.keys(albums).forEach(name=>{
 
     loadAlbum(name);
 });
+
 
 
   albumsDiv.appendChild(albumDiv);
@@ -565,4 +565,5 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
