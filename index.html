@@ -268,7 +268,7 @@ const albums = {
     {file:"Before_You_Start_Your_Day.mp3", title:"Before You Start Your Day"},
     {file:"Isle_of_Flightless_Birds.mp3", title:"Isle of Flightless Birds"}
   ]},
-  "Twentyøne Piløts": { cover:"TwentyOne_Pilots.jpg, songs: [ 
+  "Twentyøne Piløts": { cover:"TwentyOne_Pilots.jpg", songs: [ 
     {file: "The_Outside.mp3", title: "The Outside"},
     {file: "City_Walls.mp3", title: "City Walls"},
     {file: "Tally.mp3", title: "Tally"},
@@ -293,7 +293,7 @@ const albums = {
     {file: "Nico_And_The_Niners.mp3", title: "Nico And The Niners"},
     {file: "Cut_My_Lip.mp3", title: "Cut My Lip"},
     {file: "Pet_Cheetah.mp3", title: "Pet Cheetah"},
-    {file: "Legend.mp3", title: "Legend"},      
+    {file: "Legend.mp3", title: "Legend"}
 };
 
 let currentAlbum = null;
@@ -363,11 +363,7 @@ async function playSong(index, albumName=null){
   // Try offline cache
   if('caches' in window) {
     try {
-      const cache = await caches.open('notables-cache-v1');
-      const response = await cache.match('/' + song.file);
-      if(response){
-        const blob = await response.blob();
-        songUrl = URL.createObjectURL(blob); // For playback
+     songUrl = song.file; // always use real URL
       }
     } catch(e){
       console.error('Cache fetch error:', e);
@@ -503,6 +499,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
