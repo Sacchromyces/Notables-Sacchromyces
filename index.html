@@ -14,7 +14,7 @@
 <style>
 body {
     font-family: sans-serif;
-    background: #111;
+  background: linear-gradient(135deg, #111 0%, #222 50%, #111 100%);
     color: #eee;
     text-align: center;
     margin:0;
@@ -41,24 +41,25 @@ body {
 }
 
 #albums {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 25px;
     margin-bottom: 20px;
+    padding: 0 20px;
 }
+
 .album, .home-square {
-    width: 200px;
     display: flex;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
 }
+
 .album img, .home-square img {
-    width: 200px;
-    height: 200px;
+    width: 100%;
+    aspect-ratio: 1 / 1; /* keeps it square */
     object-fit: cover;
-    border-radius: 10px;
+    border-radius: 12px;
     border: 2px solid #555;
     margin-bottom: 10px;
     transition: transform 0.2s;
@@ -553,6 +554,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
