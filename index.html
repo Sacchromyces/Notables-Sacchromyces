@@ -14,7 +14,7 @@
 <style>
 body {
     font-family: sans-serif;
-    background: linear-gradient(135deg, #111 0%, #222 50%, #111 100%);
+  background: linear-gradient(135deg, #111 0%, #222 50%, #111 100%);
     color: #eee;
     text-align: center;
     margin:0;
@@ -41,49 +41,35 @@ body {
 }
 
 #albums {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-}
-
-.album-row {
     display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 180px;
-    gap: 20px;
-    overflow-x: auto;
-    padding-bottom: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 25px;
+    margin-bottom: 20px;
+    padding: 0 20px;
 }
 
 .album, .home-square {
-    width: 180px;
-    height: 180px;
     display: flex;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 2px solid #555;
-    background: #222;
-    transition: transform 0.2s;
-}
-.album:hover, .home-square:hover {
-    transform: scale(1.05);
 }
 
 .album img, .home-square img {
     width: 100%;
-    height: 100%;
+    aspect-ratio: 1 / 1; /* keeps it square */
     object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid #555;
+    margin-bottom: 10px;
+    transition: transform 0.2s;
 }
-
-.album-title, .home-square .album-title {
-    margin-top: 5px;
+.album img:hover, .home-square img:hover {
+    transform: scale(1.05);
+}
+.album-title {
     font-weight: bold;
-    text-align: center;
-    color: #eee;
+    margin-bottom: 5px;
 }
 
 #playerArea {
@@ -148,8 +134,25 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     #mainHeader img#logo { width: 30px; height: 30px; }
     #mainHeader h1 { font-size: 22px; }
 
-    .album, .home-square { width: 100%; box-sizing: border-box; }
-    .album img { height: 350px; object-fit: cover; border-radius: 10px; }
+    #albums {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
+
+    /* Make all album containers same width */
+    .album, .home-square {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Make album images fill container uniformly */
+   .album img {
+    width: 100%;
+    height: 350px; /* fixed height for all albums */
+    object-fit: cover; /* crops image to fill container uniformly */
+    border-radius: 10px;
+    }
 
     .control-btn { width: 50px; height: 50px; font-size: 20px; }
     #play { width: 60px; height: 60px; font-size: 28px; }
@@ -171,11 +174,21 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     #mobilePlayer.docked { position: absolute; box-shadow: none; }
     #albumTitle, #playlist { margin-bottom: 20px; }
 
+    /* Home square tweaks */
     .home-square img { display: none; }
     .home-square {
+        background: #222;
+        border: 1px solid #555;
+        border-radius: 6px;
         padding: 12px;
+        font-weight: bold;
         font-size: 18px;
+        color: #eee;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
     }
+    .home-square:hover { background: #333; }
 }
 </style>
 </head>
@@ -186,14 +199,7 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
   <h1>Notables</h1>
 </div>
 
-<div id="albums">
-  <div class="home-square">
-    <img src="Home.jpg" alt="Home">
-    <div class="album-title">Home</div>
-  </div>
-  <div class="album-row"></div>
-</div>
-
+<div id="albums"></div>
 <h2 id="albumTitle"></h2>
 <div id="playerArea">
   <div id="playlist"></div>
@@ -202,11 +208,39 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 
 <div id="mobilePlayer">
   <div id="controls">
-    <button id="shuffle" class="control-btn">&#128256;</button>
-    <button id="prev" class="control-btn">&#9664;</button>
-    <button id="play" class="control-btn">&#9654;</button>
-    <button id="next" class="control-btn">&#9654;&#9654;</button>
-    <button id="repeat" class="control-btn">&#128257;</button>
+    <button id="shuffle" class="control-btn" title="Shuffle">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shuffle">
+        <polyline points="16 3 21 3 21 8"></polyline>
+        <line x1="4" y1="20" x2="21" y2="3"></line>
+        <polyline points="21 16 21 21 16 21"></polyline>
+        <line x1="15" y1="15" x2="21" y2="21"></line>
+      </svg>
+    </button>
+
+    <button id="prev" class="control-btn" title="Previous">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+
+    <button id="play" class="control-btn" title="Play/Pause">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="play-icon">&#9654;</svg>
+    </button>
+
+    <button id="next" class="control-btn" title="Next">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+
+    <button id="repeat" class="control-btn" title="Repeat">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-repeat">
+        <polyline points="17 1 21 5 17 9"></polyline>
+        <path d="M3 11V9a4 4 0 014-4h14"></path>
+        <polyline points="7 23 3 19 7 15"></polyline>
+        <path d="M21 13v2a4 4 0 01-4 4H3"></path>
+      </svg>
+    </button>
   </div>
   <audio id="player" controls>
     <source id="source" src="" type="audio/mpeg">
@@ -317,7 +351,7 @@ const albums = {
  ]}
 };
 
-// --- Variables ---
+    
 let currentAlbum = null;
 let currentSong = null;
 let lastAlbum = null;
@@ -334,15 +368,17 @@ const playBtn = document.getElementById("play");
 const shuffleBtn = document.getElementById("shuffle");
 const repeatBtn = document.getElementById("repeat");
 
-// --- Functions ---
+// Update playlist highlight — only highlight the song that is actually playing in the current playlist
 function updatePlaylistButtons(){
   const buttons = [...playlistDiv.querySelectorAll("button")];
   buttons.forEach((btn, i) => {
+    // Only highlight if this is the current album AND this is the current song
     const isCurrentSong = currentSong === i && currentAlbum !== null && albums[currentAlbum].songs[currentSong].file === source.src.split('/').pop();
     btn.classList.toggle("playing", isCurrentSong);
   });
 }
 
+// --- Load album ---
 function loadAlbum(name){
   currentAlbum = name;
   lastAlbum = name;
@@ -350,11 +386,13 @@ function loadAlbum(name){
   playlistDiv.innerHTML = "";
 
   albums[name].songs.forEach((song,index)=>{
+    // create playlist button
     const btn = document.createElement("button");
     btn.textContent = song.title;
     btn.addEventListener("click", ()=>playSong(index));
     playlistDiv.appendChild(btn);
 
+    // 🔹 preload audio in the background
     const audio = new Audio();
     audio.src = song.file;
     audio.preload = "auto";
@@ -363,6 +401,7 @@ function loadAlbum(name){
   updatePlaylistButtons();
 }
 
+// --- Play song ---
 async function playSong(index, albumName=null){
   if(albumName && albumName !== currentAlbum) loadAlbum(albumName);
   if(!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
@@ -374,12 +413,41 @@ async function playSong(index, albumName=null){
   currentSong = index;
   const song = songs[currentSong];
 
-  source.src = song.file;
+  // Default to original URL
+  let songUrl = song.file;
+
+  // Try offline cache
+  if ('caches' in window) {
+  try {
+    songUrl = song.file; // always use real URL
+  } catch (e) {
+    console.error('Cache fetch error:', e);
+  }
+}
+
+
+  // Set source and play
+  source.src = songUrl;
   player.load();
   player.play();
   nowPlaying.textContent = "Now Playing: " + song.title;
   updatePlaylistButtons();
   playBtn.innerHTML = "&#10074;&#10074;";
+
+  // Media Session metadata (use original HTTPS URL, not blob)
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: song.title,
+      artist: currentAlbum,
+      album: currentAlbum,
+      artwork: [{ src: 'https://sacchromyces.github.io/Albums/' + albums[currentAlbum].cover, sizes:'200x200', type:'image/jpeg'}]
+    });
+
+    navigator.mediaSession.setActionHandler('play',  () => { player.play(); });
+    navigator.mediaSession.setActionHandler('pause', () => { player.pause(); });
+    navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
+    navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
+  }
 }
 
 // --- Next/Prev ---
@@ -405,21 +473,23 @@ function prevTrack(){
   playSong(prevIndex);
 }
 
-// --- Home button ---
-document.querySelector(".home-square").addEventListener("click", ()=>{
+// --- Home tile ---
+const homeSquare = document.createElement("div");
+homeSquare.className = "home-square";
+homeSquare.innerHTML = `<img src="Home.jpg" alt="Home"><div class="album-title">Home</div>`;
+homeSquare.addEventListener("click", ()=>{
   playlistDiv.innerHTML = "";
   albumTitle.textContent = "";
 });
+albumsDiv.appendChild(homeSquare);
 
-// --- Create album tiles ---
-const albumRow = document.querySelector(".album-row");
-
+// --- Album tiles ---
 Object.keys(albums).forEach(name=>{
   const albumDiv = document.createElement("div");
   albumDiv.className = "album";
   albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
   albumDiv.addEventListener("click", ()=>loadAlbum(name));
-  albumRow.appendChild(albumDiv);
+  albumsDiv.appendChild(albumDiv);
 });
 
 // --- Controls ---
@@ -430,14 +500,15 @@ playBtn.addEventListener("click", ()=>{
       const randomAlbum = albumNames[Math.floor(Math.random() * albumNames.length)];
       const songIndex = Math.floor(Math.random() * albums[randomAlbum].songs.length);
       playSong(songIndex, randomAlbum);
-    } else player.play();
+    } else {
+      player.play();
+    }
     playBtn.innerHTML = "&#10074;&#10074;";
   } else {
     player.pause();
     playBtn.innerHTML = "&#9654;";
   }
 });
-
 document.getElementById("next").addEventListener("click", nextTrack);
 document.getElementById("prev").addEventListener("click", prevTrack);
 shuffleBtn.addEventListener("click", ()=>{ shuffle = !shuffle; shuffleBtn.classList.toggle("active", shuffle); });
@@ -447,8 +518,11 @@ player.addEventListener("pause", ()=>playBtn.innerHTML="&#9654;");
 player.addEventListener("play", ()=>playBtn.innerHTML="&#10074;&#10074;");
 
 player.addEventListener("ended", ()=>{
-  if(repeat) playSong(currentSong);
-  else nextTrack();
+  if(repeat){
+    playSong(currentSong);
+  } else {
+    nextTrack();
+  }
 });
 
 // --- Mobile sticky ---
@@ -469,7 +543,42 @@ window.addEventListener('scroll', ()=>{
   }
 });
 
-playBtn.innerHTML = "&#9654;"; // initialize
+    // Initialize play button symbol on page load
+playBtn.innerHTML = "&#9654;"; // ►
+    
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+    .then(() => console.log("Service Worker registered"))
+    .catch(err => console.error("SW registration failed:", err));
+}
+
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
