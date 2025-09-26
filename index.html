@@ -487,16 +487,11 @@ function prevTrack(){
   if(prevIndex < 0) prevIndex = songs.length - 1;
   playSong(prevIndex);
 }
-
-// --- Home tile ---
-const homeSquare = document.createElement("div");
-homeSquare.className = "home-square";
-homeSquare.innerHTML = `<img src="Home.jpg" alt="Home"><div class="album-title">Home</div>`;
-homeSquare.addEventListener("click", ()=>{
+    
+document.querySelector(".home-square").addEventListener("click", ()=>{
   playlistDiv.innerHTML = "";
   albumTitle.textContent = "";
 });
-albumsDiv.appendChild(homeSquare);
 
 // --- Album tiles ---
 const albumRow = document.querySelector(".album-row");
@@ -573,6 +568,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
