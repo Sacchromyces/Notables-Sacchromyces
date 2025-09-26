@@ -363,14 +363,14 @@ async function playSong(index, albumName=null){
   let songUrl = song.file;
 
   // Try offline cache
-  if('caches' in window) {
-    try {
-     songUrl = song.file; // always use real URL
-      }
-    } catch(e){
-      console.error('Cache fetch error:', e);
-    }
+  if ('caches' in window) {
+  try {
+    songUrl = song.file; // always use real URL
+  } catch (e) {
+    console.error('Cache fetch error:', e);
   }
+}
+
 
   // Set source and play
   source.src = songUrl;
@@ -501,6 +501,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
