@@ -1,5 +1,6 @@
-const CACHE_NAME = "notables-cache-v1";
+const CACHE_NAME = "notables-cache-v2"; // bumped version
 
+// Only cache the app shell (HTML, manifest, covers, logo)
 const FILES_TO_CACHE = [
   "index.html",
   "manifest.json",
@@ -7,121 +8,54 @@ const FILES_TO_CACHE = [
   "Vessel.jpg",
   "Blurryface.jpg",
   "2009_21_Cover.jpg",
-  "Home.jpg",
-
-  // Vessel album
-  "Ode_to_Sleep.mp3",
-  "Migraine.mp3",
-  "House_of_Gold.mp3",
-  "Car_Radio.mp3",
-  "Semi_Automatic.mp3",
-  "Screen.mp3",
-  "The_Run_and_Go.mp3",
-  "Fake_You_Out.mp3",
-  "Guns_for_Hands.mp3",
-  "Truce.mp3",
-  "Addict_with_a_Pen.mp3",
-  "Lovely.mp3",
-  "Blasphemy.mp3",
-  "Holding_on_to_you.mp3",
-
-  // Blurryface album
-  "Stressed_Out.mp3",
-  "Ride.mp3",
-  "Fairly_Local.mp3",
-  "Tear_in_My_Heart.mp3",
-  "Lane_Boy.mp3",
-  "The_Judge.mp3",
-  "Doubt.mp3",
-  "Polarize.mp3",
-  "We_Dont_Believe_Whats_On_TV.mp3",
-  "Message_Man.mp3",
-  "Hometown.mp3",
-  "Not_Today.mp3",
-  "Goner.mp3",
-
-  // 2009 21 Pilots album
-  "Implicit_Demand_For_Proof.mp3",
-  "Fall_Away.mp3",
-  "The_Pantaloon.mp3",
-  "Friend,_Please.mp3",
-  "March_To_The_Sea.mp3",
-  "Johnny_Boy.mp3",
-  "Oh_Ms._Believer.mp3",
-  "Air_Catcher.mp3",
-  "Trapdoor.mp3",
-  "A_Car,_a_Torch,_a_Death.mp3",
-  "Taxi_Cab.mp3",
-  "Before_You_Start_Your_Day.mp3",
-  "Isle_of_Flightless_Birds.mp3"
-
-  // Twentyøne Piløts album
-  "The_Outside.mp3",
-  "City_Walls.mp3",
-  "Tally.mp3",
-  "Rawfear.mp3",
-  "One_Way.mp3", 
-  "Cottonwood.mp3", 
-  "Downstairs.mp3", 
-  "Robot_Voices.mp3",
-  "Center_Mass.mp3",
-  "Intentions.mp3",
-  "Backslide.mp3",
-  "Vignette.mp3",
-  "Lavish.mp3",
-  "Snap_Back.mp3", 
-  "Oldies_Station.mp3",
-  "Good_Day.mp3", 
-  "Jumpsuit.mp3",
-  "Levitate.mp3",
-  "Morph.mp3", 
-  "Smithereens.mp3",
-  "Neon_Gravestones.mp3", 
-  "Nico_And_The_Niners.mp3",
-  "Cut_My_Lip.mp3", 
-  "Pet_Cheetah.mp3", 
-  "Legend.mp3"
-
-  // Downstairs album
-  "On_My_Own.mp3",
-  "Points_Of_Authority.mp3",
-  "Hit_The_Floor.mp3",
-  "Give_It_Away.mp3",
-  "Breaking_the_Silence.mp3",
-  "Would.mp3",
-  "Down_In_A_Hole.mp3",
-  "Usurper.mp3",
-  "Polyphia.mp3",
-  "Doom.mp3",
-  "Saccharine.mp3",
-  "Do_You_Call_My_Name.mp3",
-  "The_Outsider.mp3",
-  "A_Place_For_My_Head.mp3",
-  "Remember_The_Name.mp3"
-
-  // Upstairs album
-  "Have_You_Ever_Seen_The_Rain.mp3",
-  "Send_Me_On_My_Way.mp3",
-  "Life_Is_A_Highway.mp3",
-  "Right_There.mp3",
-  "High_On_Life.mp3",
-  "Monks.mp3",
-  "Blue_Rooms.mp3"
+  "Home.jpg"
 ];
 
-// Install service worker → cache files
+// Install service worker → cache app shell
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
   );
 });
 
-// Fetch → serve from cache first
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
+// Activate → clean up old caches
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      )
+    )
   );
 });
+
+// Fetch → serve from cache, cache MP3s on-demand
+self.addEventListener("fetch", event => {
+  const req = event.request;
+
+  // If it's an MP3 → fetch + cache it the first time
+  if (req.url.endsWith(".mp3")) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(cache =>
+        fetch(req).then(response => {
+          cache.put(req, response.clone());
+          return response;
+        }).catch(() => caches.match(req))
+      )
+    );
+  } 
+  // Otherwise → app shell cache first
+  else {
+    event.respondWith(
+      caches.match(req).then(response => response || fetch(req))
+    );
+  }
+});
+
 
 
 
