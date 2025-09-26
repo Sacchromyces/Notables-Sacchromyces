@@ -56,7 +56,7 @@ const FILES_TO_CACHE = [
   "Isle_of_Flightless_Birds.mp3"
 
   // Twentyøne Piløts album
-  "The_Outside.mp3,
+  "The_Outside.mp3",
   "City_Walls.mp3",
   "Tally.mp3",
   "Rawfear.mp3",
@@ -96,5 +96,6 @@ self.addEventListener("fetch", event => {
     caches.match(event.request).then(response => response || fetch(event.request))
   );
 });
+
 
 
