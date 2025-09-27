@@ -162,12 +162,13 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     text-align: center;
     line-height: 1.4;
   }
-
-  #playerArea {
-    flex: 1; /* take up remaining space */
-    padding-bottom: 50px; /* optional extra space below content */
+  #nowPlaying {
+    margin: 5px 0; /* reduces top and bottom space */
   }
-
+  #playerArea {
+    margin-top: 10px; /* optional: reduce extra top spacing */
+    padding-bottom: 20px; /* optional: reduce extra bottom spacing */
+  }
   body {
     display: flex;
     flex-direction: column;
@@ -689,5 +690,6 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
