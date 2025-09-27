@@ -149,122 +149,125 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 .control-btn.active { background:#666; filter:brightness(1.3); }
 #play { width: 60px; height: 60px; font-size: 28px; }
 
-@media (max-width:480px) {
-    body {
-        padding: 15px;
-        font-size: 16px;
-        padding-bottom: 160px;
-    }
+ @media (max-width:480px) {
+  body {
+    padding: 15px;
+    font-size: 16px;
+    padding-bottom: 160px;
+  }
 
-    #mainHeader img#logo { 
-        width: 30px; 
-        height: 30px; 
-    }
-    #mainHeader h1 { 
-        font-size: 22px; 
-    }
+  #mainHeader img#logo { 
+    width: 30px; 
+    height: 30px; 
+  }
+  #mainHeader h1 { 
+    font-size: 22px; 
+  }
 
-    #albums {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch; /* make children fill parent width */
-        gap: 20px;             /* slightly larger gap between albums */
-        padding: 15px;           
-    }
-       .album-row {
-        flex-direction: column !important;
-        align-items: stretch;
-        gap: 15px;
-        width: 100%;
-    }
+  #albums {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* make children fill parent width */
+    gap: 20px;           
+    padding: 15px;           
+  }
 
-    /* Make album containers fill the screen width */
-    .album, .home-square {
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
-    }
+  .album-row {
+    flex-direction: column !important;
+    align-items: stretch;
+    gap: 15px;
+    width: 100%;
+  }
 
-    .album img {
-        width: 100%;           /* fill container width */
-        height: auto;          /* maintain aspect ratio */
-        aspect-ratio: 1 / 1;   /* square shape */
-        object-fit: cover;
-        border-radius: 12px;
-    }
+  /* Albums full width on mobile */
+  .album {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
 
-    .control-btn { 
-        width: 50px; 
-        height: 50px; 
-        font-size: 20px; 
-    }
-    #play { 
-        width: 60px; 
-        height: 60px; 
-        font-size: 28px; 
-    }
-    #playlist button { 
-        width: 95%; 
-        padding: 12px; 
-        font-size: 16px; 
-    }
-    audio { 
-        width: 100%; 
-    }
-    #albumTitle { 
-        font-size: 20px; 
-    }
+  .album img {
+    width: 100%;           
+    height: auto;          
+    aspect-ratio: 1 / 1;   
+    object-fit: cover;
+    border-radius: 12px;
+  }
 
-    #mobilePlayer {
-        position: fixed;
-        left: 0;
-        width: 100%;
-        background: #111;
-        padding: 10px 0;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
-        z-index: 9999;
-        transition: all 0.3s ease;
-    }
+  .control-btn { 
+    width: 50px; 
+    height: 50px; 
+    font-size: 20px; 
+  }
+  #play { 
+    width: 60px; 
+    height: 60px; 
+    font-size: 28px; 
+  }
+  #playlist button { 
+    width: 95%; 
+    padding: 12px; 
+    font-size: 16px; 
+  }
+  audio { 
+    width: 100%; 
+  }
+  #albumTitle { 
+    font-size: 20px; 
+  }
 
-    #mobilePlayer.docked { 
-        position: absolute; 
-        box-shadow: none; 
-    }
-    #albumTitle, #playlist { 
-        margin-bottom: 20px; 
-    }
+  #mobilePlayer {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    background: #111;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+    z-index: 9999;
+    transition: all 0.3s ease;
+  }
 
-    /* Home button full width */
-    .home-square {
-        background: #222;
-        border: 1px solid #555;
-        border-radius: 6px;
-        padding: 12px;
-        font-weight: bold;
-        font-size: 18px;
-        color: #eee;
-        text-align: center;
-        width: 400px;
-        margin: 0 auto; 
-        max-width: 90%;    
-        box-sizing: border-box;
-    }
-         /* Hide the home button image */
-        .home-square img {
-    width: 400px;   /* pick your number */
-    max-width: 100%; 
-    margin: 0 auto;
-        display: none;
-    }
-    #homeWrapper {
-        display: flex;
-        justify-content: center; /* centers child horizontally */
-        width: 100%;             /* full width of the screen */
-        padding: 0;              /* remove extra padding */
-    }
-    .home-square:hover { 
-        background: #333; 
-    }
+  #mobilePlayer.docked { 
+    position: absolute; 
+    box-shadow: none; 
+  }
+
+  #albumTitle, #playlist { 
+    margin-bottom: 20px; 
+  }
+
+  /* ✅ Home button styling */
+  .home-square {
+    flex: none;              /* remove fixed flex sizing */
+    background: #222;
+    border: 1px solid #555;
+    border-radius: 6px;
+    padding: 12px;
+    font-weight: bold;
+    font-size: 18px;
+    color: #eee;
+    text-align: center;
+    width: 400px;            /* your chosen width */
+    max-width: 90%;          /* prevent overflow on small phones */
+    margin: 0 auto;          /* center horizontally */
+    box-sizing: border-box;
+  }
+
+  /* ✅ Hide the home button image */
+  .home-square img {
+    display: none;
+  }
+
+  #homeWrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 0;
+  }
+
+  .home-square:hover { 
+    background: #333; 
+  }
 }
 
 </style>
@@ -649,6 +652,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
