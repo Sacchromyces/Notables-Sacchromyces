@@ -173,10 +173,10 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     margin-top: -50px; /* optional: reduce extra top spacing */
     padding-bottom: -10px; /* optional: reduce extra bottom spacing */
   }
-  body {
+ body {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    min-height: auto; /* allow body to shrink */
   }
 }
 
@@ -270,7 +270,7 @@ body.playlist-open #nowPlaying {
     left: 0;
     width: 100%;
     background: #111;
-    padding: 10px 0;
+    padding: 5px 0 10px 0; /* top 5px, bottom 10px */
     box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
     z-index: 9999;
     transition: all 0.3s ease;
@@ -704,6 +704,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
