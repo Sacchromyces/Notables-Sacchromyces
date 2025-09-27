@@ -80,6 +80,12 @@ body {
     justify-content: center;
     flex-wrap: wrap;
     gap: 25px;
+   }
+  @media (min-width: 1024px) {
+  .album-row {
+    flex-wrap: nowrap; /* force horizontal row on desktop */
+  }
+
 }
 
 #playerArea {
@@ -580,6 +586,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
