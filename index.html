@@ -41,20 +41,19 @@ body {
 }
 
 #albums {
-    display: flex;           /* horizontal row */
-    justify-content: center; /* center the albums */
-    gap: 25px;               /* space between albums */
+    display: flex;          /* horizontal row */
+    flex-wrap: nowrap;      /* force everything on one line */
+    justify-content: center;/* center horizontally */
+    gap: 25px;
     margin-bottom: 20px;
     padding: 0 20px;
-    flex-wrap: nowrap;       /* prevent wrapping */
-    overflow-x: auto;        /* allow horizontal scroll if needed */
 }
 
 .album, .home-square {
     width: 220px;
-    flex: 0 0 220px;         /* fixed width */
+    flex: 220px 220px 220px;         /* fixed width */
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     cursor: pointer;
 }
@@ -592,6 +591,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
