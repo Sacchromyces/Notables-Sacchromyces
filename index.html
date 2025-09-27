@@ -56,7 +56,7 @@ body {
     width: 220px;
     flex: 220px 220px 220px;         /* fixed width */
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     cursor: pointer;
 }
@@ -79,6 +79,12 @@ body {
     font-weight: bold;
     margin-bottom: 5px;
 }
+    
+ #homeWrapper {
+    display: flex;
+    justify-content: center; /* center the home button */
+    margin-bottom: 20px;
+}
     .album-row {
     display: flex;
     overflow-x: auto;
@@ -90,9 +96,8 @@ body {
   @media (min-width: 1024px) {
   .album-row {
     flex-wrap: wrap; 
-  }
 
-}
+
 
 #playerArea {
     margin-top: 10px;
@@ -207,7 +212,7 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
         font-size: 18px;
         color: #eee;
         text-align: center;
-        width: 100%;
+        width: 220px;
         box-sizing: border-box;
     }
     .home-square:hover { background: #333; }
@@ -594,6 +599,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
