@@ -156,14 +156,14 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     bottom: auto;
     left: auto;
     transform: none;
-    margin-top: 15px;     /* spacing above quote */
+    margin-top: 10px;     /* spacing above quote */
     font-size: 12px;
     color: #aaa;
     text-align: center;
     line-height: 1.4;
   }
   #nowPlaying {
-    margin: 5px 0; /* reduces top and bottom space */
+    margin: -5px 0 5px 0; /* top -5px, right 0, bottom 5px, left 0 */
   }
   #playerArea {
     margin-top: 10px; /* optional: reduce extra top spacing */
@@ -690,6 +690,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
