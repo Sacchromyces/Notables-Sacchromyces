@@ -208,7 +208,7 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     #mobilePlayer.docked { position: absolute; box-shadow: none; }
     #albumTitle, #playlist { margin-bottom: 20px; }
 
-   /* Home square tweaks */
+/* Home square tweaks */
 .home-square img { display: none; }
 .home-square {
     background: linear-gradient(135deg, #111 0%, #222 50%, #111 100%);
@@ -219,13 +219,18 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     font-size: 18px;
     color: #eee;
     text-align: center;
-    width: 85%;
-    max-width: 85%;
+    width: 90%;
+    max-width: 90%;
     box-sizing: border-box;
 }
 .home-square:hover { background: #333; }
 
-}
+/* Desktop-specific or global styles */
+#albums { flex-wrap: wrap; gap: 25px; justify-content: center; }
+.album, .home-square { width: 200px; }
+.album img, .home-square img { border-radius: 12px; height: auto; aspect-ratio: 1/1; }
+#mobilePlayer { display: none; } /* hide mobile player on desktop */
+
 </style>
 </head>
 <body>
@@ -608,6 +613,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
