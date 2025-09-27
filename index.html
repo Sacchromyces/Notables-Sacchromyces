@@ -150,30 +150,45 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 /* --- Desktop only: make player background seamless --- */
 /* Desktop-only adjustments */
 @media (min-width: 481px) {
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  #playerArea {
+    flex: 1; /* take up remaining space */
+    padding-bottom: 50px;
+  }
+
   #desktopQuote {
-    position: relative;   /* let it flow naturally below content */
-    bottom: auto;         /* remove absolute positioning */
-    left: auto;
-    transform: none;
-    margin-top: 15px;     /* spacing above quote */
+    text-align: center;
     font-size: 12px;
     color: #aaa;
-    text-align: center;
-    line-height: 1.4;
-  
+    margin-top: 10px;
+  }
+}
+
   #playerArea {
     padding-bottom: 50px; /* optional extra space below content */
   }
- #desktopQuote {
-  position: absolute;  /* stick it at the bottom */
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+#playerArea {
+  flex: 1; /* take up remaining space */
+}
+
+#desktopQuote {
+  text-align: center;
   font-size: 12px;
   color: #aaa;
-  text-align: center;
-  margin-top: 5px;
+  margin-top: 10px;
 }
+
 
  @media (max-width:480px) {
   body {
@@ -312,10 +327,6 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 <div id="playerArea">
   <div id="playlist"></div>
   <p id="nowPlaying">Now Playing: None</p>
- <p id="desktopQuote">
-    "User - Sacchromyces"<br>
-    Notables
-  </p>
 </div>
 
 <div id="mobilePlayer">
@@ -360,6 +371,11 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
   </audio>
 </div>
 
+      <p id="desktopQuote">
+    User - Sacchromyces<br>
+    Notables
+  </p>
+    
 <script>
 // --- Albums & Songs ---
 const albums = {
@@ -677,3 +693,4 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
