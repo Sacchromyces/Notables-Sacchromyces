@@ -42,7 +42,7 @@ body {
 
 #albums {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 180px); /* fixed width columns */
+    grid-template-columns: repeat(auto-fill, 220px); /* fixed width columns */
     justify-content: center; /* keeps the row centered */
     gap: 25px;
     margin-bottom: 20px;
@@ -50,7 +50,7 @@ body {
 }
 
 .album, .home-square {
-    width: 180px;
+    width: 220px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -73,6 +73,12 @@ body {
 .album-title {
     font-weight: bold;
     margin-bottom: 5px;
+}
+    .album-row {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 25px;
 }
 
 #playerArea {
@@ -486,8 +492,23 @@ homeSquare.addEventListener("click", ()=>{
 });
 albumsDiv.appendChild(homeSquare);
 
-// --- Album tiles ---
+// --- Album tiles grouped ---
+const row = document.createElement("div");
+row.className = "album-row";
+
+["Blurryface", "2009 - Twentyøne", "Twentyøne Piløts", "Upstairs", "Downstairs"].forEach(name=>{
+  const albumDiv = document.createElement("div");
+  albumDiv.className = "album";
+  albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
+  albumDiv.addEventListener("click", ()=>loadAlbum(name));
+  row.appendChild(albumDiv);
+});
+
+albumsDiv.appendChild(row);
+
+// --- Album tiles (all others) ---
 Object.keys(albums).forEach(name=>{
+  if (["Blurryface", "2009 - Twentyøne", "Twentyøne Piløts", "Upstairs", "Downstairs"].includes(name)) return;
   const albumDiv = document.createElement("div");
   albumDiv.className = "album";
   albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
@@ -558,6 +579,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
