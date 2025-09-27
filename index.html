@@ -148,23 +148,31 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 #play { width: 60px; height: 60px; font-size: 28px; }
 
 /* --- Desktop only: make player background seamless --- */
-  #mobilePlayer {
-    background: transparent;
-    box-shadow: none;
-  }
 /* Desktop-only adjustments */
 @media (min-width: 481px) {
-  #playerArea {
-    position: relative;
-    margin-top: 10px;
-  }
   #desktopQuote {
+    position: relative;   /* let it flow naturally below content */
+    bottom: auto;         /* remove absolute positioning */
+    left: auto;
+    transform: none;
+    margin-top: 15px;     /* spacing above quote */
     font-size: 12px;
     color: #aaa;
-    text-align: center;   /* center the text */
-    margin-top: 8px;      /* space above the quote */
-    line-height: 1.4;     /* spacing for two lines */
+    text-align: center;
+    line-height: 1.4;
+  
+  #playerArea {
+    padding-bottom: 50px; /* optional extra space below content */
   }
+ #desktopQuote {
+  position: absolute;  /* stick it at the bottom */
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: #aaa;
+  text-align: center;
+  margin-top: 5px;
 }
 
  @media (max-width:480px) {
@@ -304,11 +312,7 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 <div id="playerArea">
   <div id="playlist"></div>
   <p id="nowPlaying">Now Playing: None</p>
-  <audio id="player" controls>
-    <source id="source" src="" type="audio/mpeg">
-    Your browser does not support the audio element.
-  </audio>
-  <p id="desktopQuote">
+ <p id="desktopQuote">
     "User - Sacchromyces"<br>
     Notables
   </p>
@@ -673,25 +677,3 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
