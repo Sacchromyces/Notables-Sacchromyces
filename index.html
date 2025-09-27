@@ -90,12 +90,11 @@ body {
     flex-wrap: wrap;
     gap: 25px;
    }
-  @media (min-width: 1024px) {
+ @media (min-width: 1024px) {
   .album-row {
     flex-wrap: wrap; 
-       }  
-  }
-
+  }  
+}
 
 #playerArea {
     margin-top: 10px;
@@ -117,7 +116,6 @@ body {
 #playlist button:hover {
     background: #444;
 }
-/* Playing song highlight */
 #playlist button.playing {
     background: #555;
     color: #ccc;
@@ -148,6 +146,14 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 .control-btn:hover { transform: scale(1.1); filter: brightness(1.2); }
 .control-btn.active { background:#666; filter:brightness(1.3); }
 #play { width: 60px; height: 60px; font-size: 28px; }
+
+/* --- Desktop only: make player background seamless --- */
+@media (min-width: 481px) {
+  #mobilePlayer {
+    background: transparent;
+    box-shadow: none;
+  }
+}
 
  @media (max-width:480px) {
   body {
@@ -647,6 +653,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
