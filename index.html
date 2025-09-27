@@ -171,6 +171,12 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
         gap: 15px;             /* slightly larger gap between albums */
         padding: 0;            /* remove side padding */
     }
+       .album-row {
+        flex-direction: column !important;
+        align-items: stretch;
+        gap: 15px;
+        width: 100%;
+    }
 
     /* Make album containers fill the screen width */
     .album, .home-square {
@@ -631,6 +637,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
