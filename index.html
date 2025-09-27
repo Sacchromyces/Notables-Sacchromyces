@@ -172,13 +172,12 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
         box-sizing: border-box;
     }
 
-    /* Make album images fill container uniformly */
    .album img {
     width: 100%;
-    height: 350px; /* fixed height for all albums */
+    aspect-ratio: 1 / 1; /* keeps the image square */
     object-fit: cover; /* crops image to fill container uniformly */
     border-radius: 10px;
-    }
+}
 
     .control-btn { width: 50px; height: 50px; font-size: 20px; }
     #play { width: 60px; height: 60px; font-size: 28px; }
@@ -598,6 +597,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
