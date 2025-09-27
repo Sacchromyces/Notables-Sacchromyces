@@ -156,17 +156,14 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 @media (min-width: 481px) {
   #playerArea {
     position: relative;
-    padding-bottom: 50px; /* space for the quote below */
     margin-top: 10px;
   }
-
   #desktopQuote {
-    position: relative;      /* flows naturally below content */
     font-size: 12px;
     color: #aaa;
-    text-align: center;      /* center the text */
-    margin-top: 10px;        /* space above quote */
-    line-height: 1.4;        /* nicer spacing for two lines */
+    text-align: center;   /* center the text */
+    margin-top: 8px;      /* space above the quote */
+    line-height: 1.4;     /* spacing for two lines */
   }
 }
 
@@ -307,7 +304,11 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 <div id="playerArea">
   <div id="playlist"></div>
   <p id="nowPlaying">Now Playing: None</p>
- <p id="desktopQuote">
+  <audio id="player" controls>
+    <source id="source" src="" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+  <p id="desktopQuote">
     "User - Sacchromyces"<br>
     Notables
   </p>
@@ -672,6 +673,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
