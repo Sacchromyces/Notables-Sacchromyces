@@ -161,23 +161,24 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 
     #albums {
         flex-direction: column;
-        gap: 10px;
+        gap: 15px;             /* slightly larger gap between albums */
         align-items: center;
+        padding: 0 10px;       /* add a little padding to sides */
     }
 
-    /* Make all album containers same width */
+    /* Make album containers fill most of the screen width */
     .album, .home-square {
         width: 100%;
-        max-width: 100%; 
+        max-width: 100%;
         box-sizing: border-box;
     }
 
-   .album img {
-    width: 100%;
-    aspect-ratio: 1 / 1; /* keeps the image square */
-    object-fit: cover; /* crops image to fill container uniformly */
-    border-radius: 10px;
-}
+    .album img {
+        width: 100%;
+        aspect-ratio: 1 / 1;   /* keeps the image square */
+        object-fit: cover;
+        border-radius: 12px;
+    }
 
     .control-btn { width: 50px; height: 50px; font-size: 20px; }
     #play { width: 60px; height: 60px; font-size: 28px; }
@@ -199,8 +200,7 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     #mobilePlayer.docked { position: absolute; box-shadow: none; }
     #albumTitle, #playlist { margin-bottom: 20px; }
 
-    /* Home square tweaks */
-    .home-square img { display: none; }
+    /* Home button full width */
     .home-square {
         background: #222;
         border: 1px solid #555;
@@ -210,9 +210,10 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
         font-size: 18px;
         color: #eee;
         text-align: center;
-        width: 220px;
+        width: 100%;             /* full width of screen */
         box-sizing: border-box;
     }
+    .home-square img { display: none; }
     .home-square:hover { background: #333; }
 }
 </style>
@@ -597,6 +598,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
