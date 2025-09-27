@@ -153,6 +153,19 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     background: transparent;
     box-shadow: none;
   }
+       #playerArea {
+    position: relative; /* make positioning inside possible */
+    padding-bottom: 20px; /* space for quote */
+  }
+  #desktopQuote {
+    position: absolute;  /* stick it at the bottom */
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: #aaa;
+    text-align: center;
+  }
   #desktopQuote {
     font-size: 12px;
     color: #aaa;
@@ -299,7 +312,10 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 <div id="playerArea">
   <div id="playlist"></div>
   <p id="nowPlaying">Now Playing: None</p>
-  <p id="desktopQuote">"User - Sacchromyces"</p>
+ <p id="desktopQuote">
+    "User - Sacchromyces"<br>
+    Notables
+  </p>
 </div>
 
 <div id="mobilePlayer">
@@ -661,6 +677,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
