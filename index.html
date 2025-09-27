@@ -156,17 +156,23 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
         padding-bottom: 160px;
     }
 
-    #mainHeader img#logo { width: 30px; height: 30px; }
-    #mainHeader h1 { font-size: 22px; }
-
-    #albums {
-        flex-direction: column;
-        gap: 15px;             /* slightly larger gap between albums */
-        align-items: center;
-        padding: 0 10px;       /* add a little padding to sides */
+    #mainHeader img#logo { 
+        width: 30px; 
+        height: 30px; 
+    }
+    #mainHeader h1 { 
+        font-size: 22px; 
     }
 
-    /* Make album containers fill most of the screen width */
+    #albums {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch; /* make children fill parent width */
+        gap: 15px;             /* slightly larger gap between albums */
+        padding: 0;            /* remove side padding */
+    }
+
+    /* Make album containers fill the screen width */
     .album, .home-square {
         width: 100%;
         max-width: 100%;
@@ -174,17 +180,34 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     }
 
     .album img {
-        width: 100%;
-        aspect-ratio: 1 / 1;   /* keeps the image square */
+        width: 100%;           /* fill container width */
+        height: auto;          /* maintain aspect ratio */
+        aspect-ratio: 1 / 1;   /* square shape */
         object-fit: cover;
         border-radius: 12px;
     }
 
-    .control-btn { width: 50px; height: 50px; font-size: 20px; }
-    #play { width: 60px; height: 60px; font-size: 28px; }
-    #playlist button { width: 95%; padding: 12px; font-size: 16px; }
-    audio { width: 100%; }
-    #albumTitle { font-size: 20px; }
+    .control-btn { 
+        width: 50px; 
+        height: 50px; 
+        font-size: 20px; 
+    }
+    #play { 
+        width: 60px; 
+        height: 60px; 
+        font-size: 28px; 
+    }
+    #playlist button { 
+        width: 95%; 
+        padding: 12px; 
+        font-size: 16px; 
+    }
+    audio { 
+        width: 100%; 
+    }
+    #albumTitle { 
+        font-size: 20px; 
+    }
 
     #mobilePlayer {
         position: fixed;
@@ -197,8 +220,13 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
         transition: all 0.3s ease;
     }
 
-    #mobilePlayer.docked { position: absolute; box-shadow: none; }
-    #albumTitle, #playlist { margin-bottom: 20px; }
+    #mobilePlayer.docked { 
+        position: absolute; 
+        box-shadow: none; 
+    }
+    #albumTitle, #playlist { 
+        margin-bottom: 20px; 
+    }
 
     /* Home button full width */
     .home-square {
@@ -210,12 +238,17 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
         font-size: 18px;
         color: #eee;
         text-align: center;
-        width: 100%;             /* full width of screen */
+        width: 100%;            
         box-sizing: border-box;
     }
-    .home-square img { display: none; }
-    .home-square:hover { background: #333; }
+    .home-square img { 
+        display: none; 
+    }
+    .home-square:hover { 
+        background: #333; 
+    }
 }
+
 </style>
 </head>
 <body>
@@ -598,6 +631,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
