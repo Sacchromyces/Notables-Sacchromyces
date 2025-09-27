@@ -157,20 +157,21 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     left: auto;
     transform: none;
     margin-top: 10px;     /* spacing above quote */
+    min-height: auto; /* let content height shrink naturally */
     font-size: 12px;
     color: #aaa;
     text-align: center;
     line-height: 1.4;
   }
   #nowPlaying {
-    margin: 5px 0 5px 0; /* top -5px, right 0, bottom 5px, left 0 */
+    margin: 5px 0 5px 0; /* top -5px, right 0, bottom 0px, left 0 */
   }
     body.playlist-open #nowPlaying {
     margin-top: 5px; /* lower when a playlist is open */
   }
   #playerArea {
-    margin-top: -40px; /* optional: reduce extra top spacing */
-    padding-bottom: 10px; /* optional: reduce extra bottom spacing */
+    margin-top: -50px; /* optional: reduce extra top spacing */
+    padding-bottom: -10px; /* optional: reduce extra bottom spacing */
   }
   body {
     display: flex;
@@ -255,8 +256,13 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     font-size: 20px; 
   }
     
-  #nowPlaying {
-    margin-top: -5px; /* moved up by 5px */
+/* --- Mobile styles (max-width 480px) --- */
+#nowPlaying {
+    margin-top: -15px; /* move it higher above album title */
+}
+
+body.playlist-open #nowPlaying {
+    margin-top: 5px; /* keep a proper gap when playlist is open */
   }
     
   #mobilePlayer {
@@ -698,6 +704,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
