@@ -244,10 +244,14 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
         font-size: 18px;
         color: #eee;
         text-align: center;
-        width: 320px;
+        width: calc(100% - 30px);
         margin: 0 auto; 
         max-width: 100%;    
         box-sizing: border-box;
+    }
+         /* Hide the home button image */
+        .home-square img {
+        display: none;
     }
     #homeWrapper {
         display: flex;
@@ -642,6 +646,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
