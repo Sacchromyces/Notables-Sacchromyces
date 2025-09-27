@@ -41,7 +41,7 @@ body {
 }
 
 #albums {
-    display: flex;          /* horizontal row */
+    display: row;          /* horizontal row */
     flex-wrap: nowrap;      /* force everything on one line */
     justify-content: center;/* center horizontally */
     gap: 25px;
@@ -76,14 +76,12 @@ body {
     font-weight: bold;
     margin-bottom: 5px;
 }
-
-}
     .album-row {
     display: flex;
     overflow-x: auto;
     flex direction: row;
     justify-content: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 25px;
    }
   @media (min-width: 1024px) {
@@ -591,6 +589,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
