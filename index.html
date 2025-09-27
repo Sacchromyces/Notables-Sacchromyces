@@ -151,7 +151,7 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
 
 @media (max-width:480px) {
     body {
-        padding: 20px;
+        padding: 15px;
         font-size: 16px;
         padding-bottom: 160px;
     }
@@ -169,7 +169,7 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
         flex-direction: column;
         align-items: stretch; /* make children fill parent width */
         gap: 20px;             /* slightly larger gap between albums */
-        padding: 20px;            /* remove side padding */
+        padding: 15px;           
     }
        .album-row {
         flex-direction: column !important;
@@ -246,10 +246,14 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
         text-align: center;
         width: 320px;
         margin: 0 auto; 
+        max-width: 100%;    
         box-sizing: border-box;
     }
-    .home-square img { 
-        display: none; 
+    #homeWrapper {
+        display: flex;
+        justify-content: center; /* centers child horizontally */
+        width: 100%;             /* full width of the screen */
+        padding: 0;              /* remove extra padding */
     }
     .home-square:hover { 
         background: #333; 
@@ -638,6 +642,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
