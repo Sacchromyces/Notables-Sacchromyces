@@ -156,7 +156,7 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
     bottom: auto;
     left: auto;
     transform: none;
-    margin-top: 5px;     /* spacing above quote */
+    margin-top: -15px;     /* spacing above quote */
     font-size: 12px;
     color: #aaa;
     text-align: center;
@@ -164,6 +164,9 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
   }
   #nowPlaying {
     margin: 5px 0 5px 0; /* top -5px, right 0, bottom 5px, left 0 */
+  }
+      body.playlist-open #nowPlaying {
+    margin-top: 10px; /* lower when a playlist is open */
   }
   #playerArea {
     margin-top: 0px; /* optional: reduce extra top spacing */
@@ -503,23 +506,25 @@ function updatePlaylistButtons(){
   });
 }
 
-// --- Load album ---
 function loadAlbum(name){
   currentAlbum = name;
   lastAlbum = name;
   albumTitle.textContent = name;
   playlistDiv.innerHTML = "";
 
- albums[name].songs.forEach((song,index)=>{
-  const btn = document.createElement("button");
-  btn.textContent = song.title;
-  btn.addEventListener("click", ()=>playSong(index));
-  playlistDiv.appendChild(btn);
-
+  albums[name].songs.forEach((song,index)=>{
+    const btn = document.createElement("button");
+    btn.textContent = song.title;
+    btn.addEventListener("click", ()=>playSong(index));
+    playlistDiv.appendChild(btn);
   });
+
+  // Add class to indicate playlist is open
+  document.body.classList.add("playlist-open");
 
   updatePlaylistButtons();
 }
+
 
 // --- Play song ---
 async function playSong(index, albumName=null){
@@ -600,7 +605,10 @@ homeSquare.innerHTML = `<img src="Home.jpg" alt="Home"><div class="album-title">
 homeSquare.addEventListener("click", ()=>{
   playlistDiv.innerHTML = "";
   albumTitle.textContent = "";
+  // Remove playlist-open class
+  document.body.classList.remove("playlist-open");
 });
+
 document.getElementById("homeWrapper").appendChild(homeSquare);
 
 // --- Album tiles grouped ---
@@ -690,6 +698,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
