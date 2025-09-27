@@ -40,10 +40,13 @@ body {
     font-weight: bold;
 }
 
+<div id="homeWrapper"></div>
+<div id="albums"></div>
+    
 #albums {
-    display: row;          /* horizontal row */
-    flex-wrap: nowrap;      /* force everything on one line */
-    justify-content: center;/* center horizontally */
+    display: flex;         /* horizontal row */
+    flex-wrap: wrap;       /* wrap to next line if needed */
+    justify-content: center; /* center the row */
     gap: 25px;
     margin-bottom: 20px;
     padding: 0 20px;
@@ -81,12 +84,12 @@ body {
     overflow-x: auto;
     flex direction: row;
     justify-content: center;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 25px;
    }
   @media (min-width: 1024px) {
   .album-row {
-    flex-wrap: nowrap; /* force horizontal row on desktop */
+    flex-wrap: wrap; 
   }
 
 }
@@ -217,6 +220,8 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
   <img id="logo" src="Notables_Logo.jpg" alt="Notables Logo">
   <h1>Notables</h1>
 </div>
+
+ <div id="homeWrapper"></div>
 
 <div id="albums"></div>
 <h2 id="albumTitle"></h2>
@@ -500,13 +505,13 @@ homeSquare.addEventListener("click", ()=>{
   playlistDiv.innerHTML = "";
   albumTitle.textContent = "";
 });
-albumsDiv.appendChild(homeSquare);
+document.getElementById("homeWrapper").appendChild(homeSquare);
 
 // --- Album tiles grouped ---
 const row = document.createElement("div");
 row.className = "album-row";
 
-["Blurryface", "2009 - Twentyøne", "Twentyøne Piløts", "Upstairs", "Downstairs"].forEach(name=>{
+["Vessel", "Blurryface", "2009 - Twentyøne", "Twentyøne Piløts", "Upstairs", "Downstairs"].forEach(name=>{
   const albumDiv = document.createElement("div");
   albumDiv.className = "album";
   albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
@@ -518,7 +523,7 @@ albumsDiv.appendChild(row);
 
 // --- Album tiles (all others) ---
 Object.keys(albums).forEach(name=>{
-  if (["Blurryface", "2009 - Twentyøne", "Twentyøne Piløts", "Upstairs", "Downstairs"].includes(name)) return;
+  if (["Vessel","Blurryface", "2009 - Twentyøne", "Twentyøne Piløts", "Upstairs", "Downstairs"].includes(name)) return;
   const albumDiv = document.createElement("div");
   albumDiv.className = "album";
   albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
@@ -589,6 +594,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
