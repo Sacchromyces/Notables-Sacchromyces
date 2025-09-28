@@ -176,7 +176,7 @@ audio { margin-top: 12px; width: 95%; max-width: 1000px; outline: none; backgrou
  body {
     display: flex;
     flex-direction: column;
-    min-height: auto; /* allow body to shrink */
+    min-height: calc(100vh - 5px); /* allow body to shrink */
   }
 }
 
@@ -708,6 +708,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
