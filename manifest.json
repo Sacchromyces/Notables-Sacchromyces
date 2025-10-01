@@ -1,15 +1,21 @@
 {
-  "name": "My Music Player",
-  "short_name": "Music",
-  "start_url": ".",
+  "name": "Notables",
+  "short_name": "Notables",
+  "start_url": "/index.html",
   "display": "standalone",
-  "background_color": "#000000",
+  "background_color": "#111111",
   "theme_color": "#000000",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "Notables_Logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "Notables_Logo.jpg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/jpeg"
     }
   ]
 }
