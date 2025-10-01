@@ -381,10 +381,10 @@ body.playlist-open #nowPlaying {
   </audio>
 </div>
 
-      <p id="desktopQuote">
+<p id="desktopQuote">
     User - Sacchromyces<br>
     Notables
-  </p>
+</p>
     
 <script>
 // --- Albums & Songs ---
@@ -489,7 +489,6 @@ const albums = {
  ]}
 };
 
-    
 let currentAlbum = null;
 let currentSong = null;
 let lastAlbum = null;
@@ -506,11 +505,10 @@ const playBtn = document.getElementById("play");
 const shuffleBtn = document.getElementById("shuffle");
 const repeatBtn = document.getElementById("repeat");
 
-// Update playlist highlight — only highlight the song that is actually playing in the current playlist
+// --- Functions ---
 function updatePlaylistButtons(){
   const buttons = [...playlistDiv.querySelectorAll("button")];
   buttons.forEach((btn, i) => {
-    // Only highlight if this is the current album AND this is the current song
     const isCurrentSong = currentSong === i && currentAlbum !== null && albums[currentAlbum].songs[currentSong].file === source.src.split('/').pop();
     btn.classList.toggle("playing", isCurrentSong);
   });
@@ -529,14 +527,11 @@ function loadAlbum(name){
     playlistDiv.appendChild(btn);
   });
 
-  // Add class to indicate playlist is open
   document.body.classList.add("playlist-open");
-
   updatePlaylistButtons();
 }
 
-
-// --- Play song ---
+// --- Play song with Media Session ---
 async function playSong(index, albumName=null){
   if(albumName && albumName !== currentAlbum) loadAlbum(albumName);
   if(!currentAlbum && lastAlbum) currentAlbum = lastAlbum;
@@ -547,45 +542,34 @@ async function playSong(index, albumName=null){
 
   currentSong = index;
   const song = songs[currentSong];
+  const songUrl = song.file;
 
-  // Default to original URL
-  let songUrl = song.file;
-
-  // Try offline cache
-  if ('caches' in window) {
-  try {
-    songUrl = song.file; // always use real URL
-  } catch (e) {
-    console.error('Cache fetch error:', e);
-  }
-}
-
-
-  // Set source and play
   source.src = songUrl;
   player.load();
-  player.play();
+  await player.play().catch(e=>console.log("Playback error:", e));
   nowPlaying.textContent = "Now Playing: " + song.title;
   updatePlaylistButtons();
   playBtn.innerHTML = "&#10074;&#10074;";
 
-  // Media Session metadata (use original HTTPS URL, not blob)
-  if ('mediaSession' in navigator) {
+  // Media Session metadata
+  if('mediaSession' in navigator){
     navigator.mediaSession.metadata = new MediaMetadata({
       title: song.title,
       artist: currentAlbum,
       album: currentAlbum,
-      artwork: [{ src: 'https://sacchromyces.github.io/Albums/' + albums[currentAlbum].cover, sizes:'200x200', type:'image/jpeg'}]
+      artwork: [
+        {src: window.location.origin + '/Albums/' + albums[currentAlbum].cover, sizes: '200x200', type:'image/jpeg'}
+      ]
     });
 
-    navigator.mediaSession.setActionHandler('play',  () => { player.play(); });
-    navigator.mediaSession.setActionHandler('pause', () => { player.pause(); });
+    navigator.mediaSession.setActionHandler('play', ()=>{ player.play(); playBtn.innerHTML="&#10074;&#10074;"; });
+    navigator.mediaSession.setActionHandler('pause', ()=>{ player.pause(); playBtn.innerHTML="&#9654;"; });
     navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
     navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
   }
 }
 
-// --- Next/Prev ---
+// --- Next/Prev tracks ---
 function nextTrack(){
   if(!currentAlbum) return;
   const songs = albums[currentAlbum].songs;
@@ -599,7 +583,6 @@ function nextTrack(){
   }
   playSong(nextIndex);
 }
-
 function prevTrack(){
   if(!currentAlbum) return;
   const songs = albums[currentAlbum].songs;
@@ -615,16 +598,13 @@ homeSquare.innerHTML = `<img src="Home.jpg" alt="Home"><div class="album-title">
 homeSquare.addEventListener("click", ()=>{
   playlistDiv.innerHTML = "";
   albumTitle.textContent = "";
-  // Remove playlist-open class
   document.body.classList.remove("playlist-open");
 });
-
 document.getElementById("homeWrapper").appendChild(homeSquare);
 
-// --- Album tiles grouped ---
+// --- Album tiles row ---
 const row = document.createElement("div");
 row.className = "album-row";
-
 ["Vessel", "Blurryface", "2009 - Twentyøne", "Twentyøne Piløts", "Upstairs", "Downstairs"].forEach(name=>{
   const albumDiv = document.createElement("div");
   albumDiv.className = "album";
@@ -632,12 +612,11 @@ row.className = "album-row";
   albumDiv.addEventListener("click", ()=>loadAlbum(name));
   row.appendChild(albumDiv);
 });
-
 albumsDiv.appendChild(row);
 
-// --- Album tiles (all others) ---
+// --- All other albums ---
 Object.keys(albums).forEach(name=>{
-  if (["Vessel","Blurryface", "2009 - Twentyøne", "Twentyøne Piløts", "Upstairs", "Downstairs"].includes(name)) return;
+  if(["Vessel","Blurryface","2009 - Twentyøne","Twentyøne Piløts","Upstairs","Downstairs"].includes(name)) return;
   const albumDiv = document.createElement("div");
   albumDiv.className = "album";
   albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
@@ -648,18 +627,16 @@ Object.keys(albums).forEach(name=>{
 // --- Controls ---
 playBtn.addEventListener("click", ()=>{
   if(player.paused){
-    if(currentSong === null){
+    if(currentSong===null){
       const albumNames = Object.keys(albums);
-      const randomAlbum = albumNames[Math.floor(Math.random() * albumNames.length)];
-      const songIndex = Math.floor(Math.random() * albums[randomAlbum].songs.length);
+      const randomAlbum = albumNames[Math.floor(Math.random()*albumNames.length)];
+      const songIndex = Math.floor(Math.random()*albums[randomAlbum].songs.length);
       playSong(songIndex, randomAlbum);
-    } else {
-      player.play();
-    }
-    playBtn.innerHTML = "&#10074;&#10074;";
+    } else player.play();
+    playBtn.innerHTML="&#10074;&#10074;";
   } else {
     player.pause();
-    playBtn.innerHTML = "&#9654;";
+    playBtn.innerHTML="&#9654;";
   }
 });
 document.getElementById("next").addEventListener("click", nextTrack);
@@ -671,11 +648,8 @@ player.addEventListener("pause", ()=>playBtn.innerHTML="&#9654;");
 player.addEventListener("play", ()=>playBtn.innerHTML="&#10074;&#10074;");
 
 player.addEventListener("ended", ()=>{
-  if(repeat){
-    playSong(currentSong);
-  } else {
-    nextTrack();
-  }
+  if(repeat) playSong(currentSong);
+  else nextTrack();
 });
 
 // --- Mobile sticky ---
@@ -696,45 +670,14 @@ window.addEventListener('scroll', ()=>{
   }
 });
 
-    // Initialize play button symbol on page load
 playBtn.innerHTML = "&#9654;"; // ►
-    
-if ("serviceWorker" in navigator) {
+
+if("serviceWorker" in navigator){
   navigator.serviceWorker.register("/sw.js")
-    .then(() => console.log("Service Worker registered"))
-    .catch(err => console.error("SW registration failed:", err));
+    .then(()=>console.log("Service Worker registered"))
+    .catch(err=>console.error("SW registration failed:", err));
 }
 
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
