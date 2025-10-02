@@ -317,6 +317,15 @@ body.playlist-open #nowPlaying {
   transform: scale(1);
   transition: transform 0.2s ease;
 }
+    @keyframes pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.album.pop {
+  animation: pop 0.35s ease forwards;
+}
 
   #homeWrapper {
     display: flex;
@@ -644,7 +653,6 @@ row.className = "album-row";
 
 albumsDiv.appendChild(row);
 
-// --- Album tiles (all others) ---
 Object.keys(albums).forEach(name => {
   if (["Vessel","Blurryface","2009 - Twentyøne","Twentyøne Piløts","Upstairs","Downstairs"].includes(name)) return;
 
@@ -655,18 +663,16 @@ Object.keys(albums).forEach(name => {
   if (window.innerWidth <= 480) {
     // Mobile: pop effect on click
     albumDiv.addEventListener("click", () => {
-      // Step 1: add 'pop' class
+      // Add class to trigger CSS animation
       albumDiv.classList.add("pop");
 
-      // Step 2: after 150ms, remove 'pop' and add 'pop-back' for smooth return
-      setTimeout(() => {
+      // Remove class after animation ends so it can be triggered again
+      albumDiv.addEventListener("animationend", () => {
         albumDiv.classList.remove("pop");
-        albumDiv.classList.add("pop-back");
-      }, 150);
+      }, { once: true });
 
-      // Step 3: after transition completes, remove 'pop-back'
+      // Load album after animation
       setTimeout(() => {
-        albumDiv.classList.remove("pop-back");
         loadAlbum(name);
       }, 350);
     });
@@ -677,6 +683,7 @@ Object.keys(albums).forEach(name => {
 
   albumsDiv.appendChild(albumDiv);
 });
+
 
 
 
@@ -743,6 +750,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
