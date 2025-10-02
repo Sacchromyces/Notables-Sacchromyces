@@ -636,24 +636,31 @@ row.className = "album-row";
 albumsDiv.appendChild(row);
 
 // --- Album tiles (all others) ---
-Object.keys(albums).forEach(name=>{
-  if (["Vessel","Blurryface", "2009 - Twentyøne", "Twentyøne Piløts", "Upstairs", "Downstairs"].includes(name)) return;
+Object.keys(albums).forEach(name => {
+  if (["Vessel","Blurryface","2009 - Twentyøne","Twentyøne Piløts","Upstairs","Downstairs"].includes(name)) return;
+
   const albumDiv = document.createElement("div");
   albumDiv.className = "album";
   albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
-if(window.innerWidth <= 480){
-  albumDiv.addEventListener("click", () => {
-    albumDiv.style.transform = "scale(0.95)"; // subtle pop effect
-    setTimeout(() => {
-      albumDiv.style.transform = "scale(1)";
-      loadAlbum(name);
-    }, 100);
-  });
-} else {
-  albumDiv.addEventListener("click", () => loadAlbum(name));
-}
+
+  if(window.innerWidth <= 480){
+    // Mobile: pop effect on tap
+    albumDiv.addEventListener("click", () => {
+      albumDiv.style.transform = "scale(1.05)"; // pop slightly bigger
+      setTimeout(() => {
+        albumDiv.style.transform = "scale(1)"; // back to normal
+        loadAlbum(name);
+      }, 100);
+    });
+  } else {
+    // Desktop: normal click (hover already handles scale)
+    albumDiv.addEventListener("click", () => loadAlbum(name));
+  }
+
   albumsDiv.appendChild(albumDiv);
 });
+
+    
 
 // --- Controls ---
 playBtn.addEventListener("click", ()=>{
@@ -718,6 +725,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
