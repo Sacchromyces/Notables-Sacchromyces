@@ -308,6 +308,15 @@ body.playlist-open #nowPlaying {
   .home-square img {
     display: none;
   }
+    .album.pop {
+  transform: scale(1.05);
+  transition: transform 0.15s ease;
+}
+
+.album.pop-back {
+  transform: scale(1);
+  transition: transform 0.2s ease;
+}
 
   #homeWrapper {
     display: flex;
@@ -646,20 +655,18 @@ Object.keys(albums).forEach(name => {
   if (window.innerWidth <= 480) {
     // Mobile: pop effect on click
     albumDiv.addEventListener("click", () => {
-      // Step 1: pop up
-      albumDiv.style.transition = "transform 0.15s ease";
-      albumDiv.style.transform = "scale(1.05)";
+      // Step 1: add 'pop' class
+      albumDiv.classList.add("pop");
 
-      // Step 2: ensure browser registers the first transform before scaling back
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          albumDiv.style.transition = "transform 0.2s ease";
-          albumDiv.style.transform = "scale(1)";
-        });
-      });
-
-      // Step 3: load album after animation
+      // Step 2: after 150ms, remove 'pop' and add 'pop-back' for smooth return
       setTimeout(() => {
+        albumDiv.classList.remove("pop");
+        albumDiv.classList.add("pop-back");
+      }, 150);
+
+      // Step 3: after transition completes, remove 'pop-back'
+      setTimeout(() => {
+        albumDiv.classList.remove("pop-back");
         loadAlbum(name);
       }, 350);
     });
@@ -670,6 +677,7 @@ Object.keys(albums).forEach(name => {
 
   albumsDiv.appendChild(albumDiv);
 });
+
 
 
 // --- Controls ---
@@ -735,6 +743,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
