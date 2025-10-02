@@ -650,11 +650,13 @@ Object.keys(albums).forEach(name => {
       albumDiv.style.transition = "transform 0.15s ease";
       albumDiv.style.transform = "scale(1.05)";
 
-      // Step 2: scale back smoothly
-      setTimeout(() => {
-        albumDiv.style.transition = "transform 0.2s ease";
-        albumDiv.style.transform = "scale(1)";
-      }, 150);
+      // Step 2: ensure browser registers the first transform before scaling back
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          albumDiv.style.transition = "transform 0.2s ease";
+          albumDiv.style.transform = "scale(1)";
+        });
+      });
 
       // Step 3: load album after animation
       setTimeout(() => {
@@ -733,6 +735,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
