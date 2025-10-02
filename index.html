@@ -652,7 +652,7 @@ Object.keys(albums).forEach(name => {
     // Wait for animation to finish, then reset and load
     setTimeout(() => {
       albumDiv.style.transform = "scale(1)";
-      albumDiv.style.transform = "transform 0.15s ease"; // back to normal
+      albumDiv.style.transition = "transform 0.15s ease"; // back to normal
     }, 100);
 
     // Slightly delay loading album so animation is visible
@@ -734,6 +734,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
