@@ -641,7 +641,17 @@ Object.keys(albums).forEach(name=>{
   const albumDiv = document.createElement("div");
   albumDiv.className = "album";
   albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
-  albumDiv.addEventListener("click", ()=>loadAlbum(name));
+if(window.innerWidth <= 480){
+  albumDiv.addEventListener("click", () => {
+    albumDiv.style.transform = "scale(0.95)"; // subtle pop effect
+    setTimeout(() => {
+      albumDiv.style.transform = "scale(1)";
+      loadAlbum(name);
+    }, 100);
+  });
+} else {
+  albumDiv.addEventListener("click", () => loadAlbum(name));
+}
   albumsDiv.appendChild(albumDiv);
 });
 
@@ -667,7 +677,6 @@ document.getElementById("prev").addEventListener("click", prevTrack);
 shuffleBtn.addEventListener("click", ()=>{ shuffle = !shuffle; shuffleBtn.classList.toggle("active", shuffle); });
 repeatBtn.addEventListener("click", ()=>{ repeat = !repeat; repeatBtn.classList.toggle("active", repeat); });
 
-// --- Player event listeners ---
 player.addEventListener("pause", ()=>playBtn.innerHTML="&#9654;");
 player.addEventListener("play", ()=>playBtn.innerHTML="&#10074;&#10074;");
 
@@ -678,79 +687,6 @@ player.addEventListener("ended", ()=>{
     nextTrack();
   }
 });
-
-let lockPaused = false; // Tracks lock screen pause state
-
-// --- Controls (Play/Pause) ---
-playBtn.addEventListener("click", () => {
-  if (!lockPaused && !player.paused) {
-    // "Pause" using playbackRate = 0
-    player.playbackRate = 0;
-    lockPaused = true;
-    playBtn.innerHTML = "&#9654;"; // ►
-    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
-  } else {
-    // Resume playback
-    player.playbackRate = 1;
-    lockPaused = false;
-    if (player.paused) player.play();
-    playBtn.innerHTML = "&#10074;&#10074;"; // ❚❚
-    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
-  }
-});
-
-// --- Media Session handlers ---
-if ('mediaSession' in navigator) {
-  navigator.mediaSession.setActionHandler('play', () => {
-    player.playbackRate = 1;
-    lockPaused = false;
-    player.play();
-    playBtn.innerHTML = "&#10074;&#10074;";
-    navigator.mediaSession.playbackState = "playing";
-  });
-
- navigator.mediaSession.setActionHandler('pause', () => {
-    lockPaused = true;
-    playBtn.innerHTML = "&#9654;"; // ►
-
-    // Reduce volume to very low (e.g., 1%)
-    player.volume = 0.01;
-
-    // Ensure playback continues and loops
-    if (player.paused) player.play();
-    player.loop = true;
-
-    // Update MediaSession playback state
-    navigator.mediaSession.playbackState = "paused";
-});
-
-
-  navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
-  navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
-}
-
-// --- Keep lock screen progress in sync ---
-player.addEventListener('timeupdate', () => {
-  if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
-    navigator.mediaSession.setPositionState({
-      duration: player.duration || 0,
-      playbackRate: player.playbackRate,
-      position: player.currentTime
-    });
-  }
-});
-
-// --- Reset lockPaused flag if playback ends naturally ---
-player.addEventListener('ended', () => {
-  lockPaused = false;
-  playBtn.innerHTML = "&#9654;";
-  if (repeat) {
-    playSong(currentSong);
-  } else {
-    nextTrack();
-  }
-});
-
 
 // --- Mobile sticky ---
 const mobilePlayer = document.getElementById("mobilePlayer");
@@ -782,8 +718,6 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
-
-
 
 
 
