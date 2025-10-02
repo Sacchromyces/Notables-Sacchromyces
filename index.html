@@ -658,13 +658,31 @@ document.getElementById("homeWrapper").appendChild(homeSquare);
 const row = document.createElement("div");
 row.className = "album-row";
 
-["Vessel", "Blurryface", "2009 - Twentyøne", "Twentyøne Piløts", "Upstairs", "Downstairs"].forEach(name=>{
+["Vessel", "Blurryface", "2009 - Twentyøne", "Twentyøne Piløts", "Upstairs", "Downstairs"].forEach(name => {
   const albumDiv = document.createElement("div");
   albumDiv.className = "album";
   albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
-  albumDiv.addEventListener("click", ()=>loadAlbum(name));
+
+  if (window.innerWidth <= 480) {
+    // Mobile: pop effect on tap
+    albumDiv.addEventListener("click", () => {
+      const img = albumDiv.querySelector("img");
+      img.classList.remove("pop");       // reset animation
+      void img.offsetWidth;              // force reflow
+      img.classList.add("pop");          // trigger pop
+      img.addEventListener("animationend", () => {
+        img.classList.remove("pop");
+        loadAlbum(name);                 // load album after animation
+      }, { once: true });
+    });
+  } else {
+    // Desktop: normal click
+    albumDiv.addEventListener("click", () => loadAlbum(name));
+  }
+
   row.appendChild(albumDiv);
 });
+
 
 albumsDiv.appendChild(row);
 
@@ -768,6 +786,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
