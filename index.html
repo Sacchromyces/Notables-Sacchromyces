@@ -594,73 +594,29 @@ async function playSong(index, albumName=null){
 }
 
 
-function playSong(index, albumName = currentAlbum) {
-  const song = albums[albumName].songs[index];
-  currentSong = index;
-  currentAlbum = albumName;
-
-  player.src = song.src;
+  // Set source and play
+  source.src = songUrl;
+  player.load();
   player.play();
+  nowPlaying.textContent = "Now Playing: " + song.title;
+  updatePlaylistButtons();
+  playBtn.innerHTML = "&#10074;&#10074;";
 
-  // Update UI
-  nowPlaying.textContent = `${song.title} — ${albumName}`;
-
-  // --- Media Session metadata & controls ---
+  // Media Session metadata (use original HTTPS URL, not blob)
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: song.title,
-      artist: albumName,
-      album: albumName,
-      artwork: [
-        {
-          src: 'https://sacchromyces.github.io/Albums/' + albums[albumName].cover,
-          sizes: '200x200',
-          type: 'image/jpeg'
-        }
-      ]
+      artist: currentAlbum,
+      album: currentAlbum,
+      artwork: [{ src: 'https://sacchromyces.github.io/Albums/' + albums[currentAlbum].cover, sizes:'200x200', type:'image/jpeg'}]
     });
 
-    // Basic controls
     navigator.mediaSession.setActionHandler('play',  () => { player.play(); });
     navigator.mediaSession.setActionHandler('pause', () => { player.pause(); });
     navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
     navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
-
-    // Extra seeking controls
-    navigator.mediaSession.setActionHandler('seekbackward', (event) => {
-      const skip = event.seekOffset || 10;
-      player.currentTime = Math.max(player.currentTime - skip, 0);
-    });
-
-    navigator.mediaSession.setActionHandler('seekforward', (event) => {
-      const skip = event.seekOffset || 10;
-      player.currentTime = Math.min(player.currentTime + skip, player.duration);
-    });
-
-    navigator.mediaSession.setActionHandler('seekto', (event) => {
-      if (event.fastSeek && 'fastSeek' in player) {
-        player.fastSeek(event.seekTime);
-        return;
-      }
-      player.currentTime = event.seekTime;
-    });
-
-    // 🔹 Keep lock screen progress bar visible & updating
-    if ('setPositionState' in navigator.mediaSession) {
-      player.addEventListener('timeupdate', () => {
-        if (!isNaN(player.duration) && isFinite(player.duration)) {
-          navigator.mediaSession.setPositionState({
-            duration: player.duration,
-            playbackRate: player.playbackRate,
-            position: player.currentTime
-          });
-        }
-      });
-    }
   }
 }
-
-
 
 // --- Next/Prev ---
 function nextTrack(){
@@ -830,9 +786,6 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
-
-
-
 
 
 
