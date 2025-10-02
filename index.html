@@ -636,7 +636,6 @@ row.className = "album-row";
 albumsDiv.appendChild(row);
 
 // --- Album tiles (all others) ---
-// --- Album tiles (all others) ---
 Object.keys(albums).forEach(name => {
   if (["Vessel","Blurryface","2009 - Twentyøne","Twentyøne Piløts","Upstairs","Downstairs"].includes(name)) return;
 
@@ -645,20 +644,22 @@ Object.keys(albums).forEach(name => {
   albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
 
   if (window.innerWidth <= 480) {
-    // Mobile: pop effect on tap
+    // Mobile: pop effect on click
     albumDiv.addEventListener("click", () => {
+      // Step 1: pop up
       albumDiv.style.transition = "transform 0.15s ease";
       albumDiv.style.transform = "scale(1.05)";
 
-      // Scale back to normal
+      // Step 2: scale back smoothly
       setTimeout(() => {
+        albumDiv.style.transition = "transform 0.2s ease";
         albumDiv.style.transform = "scale(1)";
       }, 150);
 
-      // Delay loading album so animation is visible
+      // Step 3: load album after animation
       setTimeout(() => {
         loadAlbum(name);
-      }, 200);
+      }, 350);
     });
   } else {
     // Desktop: normal click
@@ -732,6 +733,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
