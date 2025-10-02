@@ -326,7 +326,22 @@ body.playlist-open #nowPlaying {
 .album.pop {
   animation: pop 0.35s ease forwards;
 }
+/* Remove hover scale on mobile so animation works properly */
+@media (max-width: 480px) {
+  .album img:hover {
+    transform: none;
+  }
 
+  /* Pop animation for tapped image */
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  .album img.pop {
+    animation: pop 0.35s ease forwards;
+  }
   #homeWrapper {
     display: flex;
     justify-content: center;
@@ -661,20 +676,24 @@ Object.keys(albums).forEach(name => {
   albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
 
   if (window.innerWidth <= 480) {
-    // Mobile: pop effect on click
+    // Mobile: pop effect on tap
     albumDiv.addEventListener("click", () => {
-      // Add class to trigger CSS animation
-      albumDiv.classList.add("pop");
+      const img = albumDiv.querySelector("img");
 
-      // Remove class after animation ends so it can be triggered again
-      albumDiv.addEventListener("animationend", () => {
-        albumDiv.classList.remove("pop");
-      }, { once: true });
+      // Remove previous animation if any
+      img.classList.remove("pop");
 
-      // Load album after animation
-      setTimeout(() => {
+      // Force reflow to restart animation
+      void img.offsetWidth;
+
+      // Trigger animation
+      img.classList.add("pop");
+
+      // Load album after animation completes
+      img.addEventListener("animationend", () => {
+        img.classList.remove("pop");
         loadAlbum(name);
-      }, 350);
+      }, { once: true });
     });
   } else {
     // Desktop: normal click
@@ -683,7 +702,6 @@ Object.keys(albums).forEach(name => {
 
   albumsDiv.appendChild(albumDiv);
 });
-
 
 
 
@@ -750,6 +768,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
