@@ -679,28 +679,68 @@ player.addEventListener("ended", ()=>{
   }
 });
 
-// --- Lock screen playback state (Media Session) ---
+let lockPaused = false; // Tracks lock screen pause state
+
+// --- Controls (Play/Pause) ---
+playBtn.addEventListener("click", () => {
+  if (!lockPaused && !player.paused) {
+    // "Pause" using playbackRate = 0
+    player.playbackRate = 0;
+    lockPaused = true;
+    playBtn.innerHTML = "&#9654;"; // ►
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
+  } else {
+    // Resume playback
+    player.playbackRate = 1;
+    lockPaused = false;
+    if (player.paused) player.play();
+    playBtn.innerHTML = "&#10074;&#10074;"; // ❚❚
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
+  }
+});
+
+// --- Media Session handlers ---
 if ('mediaSession' in navigator) {
-  // Update lock screen play/pause state
-  player.addEventListener('play', () => {
+  navigator.mediaSession.setActionHandler('play', () => {
+    player.playbackRate = 1;
+    lockPaused = false;
+    player.play();
+    playBtn.innerHTML = "&#10074;&#10074;";
     navigator.mediaSession.playbackState = "playing";
   });
 
-  player.addEventListener('pause', () => {
+  navigator.mediaSession.setActionHandler('pause', () => {
+    player.playbackRate = 0;
+    lockPaused = true;
+    playBtn.innerHTML = "&#9654;";
     navigator.mediaSession.playbackState = "paused";
   });
 
-  // Keep lock screen progress bar in sync
-  player.addEventListener('timeupdate', () => {
-    if ('setPositionState' in navigator.mediaSession) {
-      navigator.mediaSession.setPositionState({
-        duration: player.duration || 0,
-        playbackRate: player.playbackRate || 1,
-        position: player.currentTime || 0
-      });
-    }
-  });
+  navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
+  navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
 }
+
+// --- Keep lock screen progress in sync ---
+player.addEventListener('timeupdate', () => {
+  if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
+    navigator.mediaSession.setPositionState({
+      duration: player.duration || 0,
+      playbackRate: player.playbackRate,
+      position: player.currentTime
+    });
+  }
+});
+
+// --- Reset lockPaused flag if playback ends naturally ---
+player.addEventListener('ended', () => {
+  lockPaused = false;
+  playBtn.innerHTML = "&#9654;";
+  if (repeat) {
+    playSong(currentSong);
+  } else {
+    nextTrack();
+  }
+});
 
 
 // --- Mobile sticky ---
@@ -733,6 +773,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
