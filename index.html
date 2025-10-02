@@ -643,15 +643,23 @@ Object.keys(albums).forEach(name => {
   albumDiv.className = "album";
   albumDiv.innerHTML = `<img src="${albums[name].cover}" alt="${name}"><div class="album-title">${name}</div>`;
 
-  if(window.innerWidth <= 480){
-    // Mobile: pop effect on tap
-    albumDiv.addEventListener("click", () => {
-      albumDiv.style.transform = "scale(1.05)"; // pop slightly bigger
-      setTimeout(() => {
-        albumDiv.style.transform = "scale(1)"; // back to normal
-        loadAlbum(name);
-      }, 100);
-    });
+ if (window.innerWidth <= 480) {
+  // Mobile: pop effect on tap
+  albumDiv.addEventListener("click", () => {
+    albumDiv.style.transition = "transform 0.15s ease"; // ensure smooth animation
+    albumDiv.style.transform = "scale(1.05)"; // pop slightly bigger
+
+    // Wait for animation to finish, then reset and load
+    setTimeout(() => {
+      albumDiv.style.transform = "scale(1)"; // back to normal
+    }, 150);
+
+    // Slightly delay loading album so animation is visible
+    setTimeout(() => {
+      loadAlbum(name);
+    }, 200);
+  });
+     
   } else {
     // Desktop: normal click (hover already handles scale)
     albumDiv.addEventListener("click", () => loadAlbum(name));
@@ -725,6 +733,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
