@@ -709,12 +709,21 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.playbackState = "playing";
   });
 
-  navigator.mediaSession.setActionHandler('pause', () => {
-    player.playbackRate = 0;
+ navigator.mediaSession.setActionHandler('pause', () => {
     lockPaused = true;
-    playBtn.innerHTML = "&#9654;";
+    playBtn.innerHTML = "&#9654;"; // ►
+
+    // Reduce volume to very low (e.g., 1%)
+    player.volume = 0.01;
+
+    // Ensure playback continues and loops
+    if (player.paused) player.play();
+    player.loop = true;
+
+    // Update MediaSession playback state
     navigator.mediaSession.playbackState = "paused";
-  });
+});
+
 
   navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
   navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
@@ -773,6 +782,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
