@@ -570,21 +570,30 @@ async function playSong(index, albumName=null){
   playBtn.innerHTML = "&#10074;&#10074;";
 
   // Media Session metadata (use original HTTPS URL, not blob)
-  if ('mediaSession' in navigator) {
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: song.title,
-      artist: currentAlbum,
-      album: currentAlbum,
-      artwork: [{ src: 'https://sacchromyces.github.io/Albums/' + albums[currentAlbum].cover, sizes:'200x200', type:'image/jpeg'}]
-    });
+if ('mediaSession' in navigator) {
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: song.title,
+    artist: currentAlbum,
+    album: currentAlbum,
+    artwork: [
+      {
+        src: 'https://sacchromyces.github.io/Albums/' + albums[currentAlbum].cover,
+        sizes: '200x200',
+        type: 'image/jpeg'
+      }
+    ]
+  });
 
-    navigator.mediaSession.setActionHandler('play',  () => { player.play(); });
-    navigator.mediaSession.setActionHandler('pause', () => { player.pause(); });
-    navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
-    navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
-  }
-    if ('mediaSession' in navigator) {
-  // Keep lock screen progress bar updated
+  navigator.mediaSession.setActionHandler('play', () => { 
+    player.play(); 
+  });
+  navigator.mediaSession.setActionHandler('pause', () => { 
+    player.pause(); 
+  });
+  navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
+  navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
+
+  // --- Lock screen integration (Android only) ---
   player.addEventListener('timeupdate', () => {
     if ('setPositionState' in navigator.mediaSession) {
       navigator.mediaSession.setPositionState({
@@ -595,7 +604,7 @@ async function playSong(index, albumName=null){
     }
   });
 
-  // Keep notification visible when paused
+  // Keep the player visible when paused/playing
   player.addEventListener('play', () => {
     navigator.mediaSession.playbackState = "playing";
   });
@@ -605,7 +614,7 @@ async function playSong(index, albumName=null){
   });
 }
 
-// --- Next/Prev ---
+// --- Next/Prev --- 
 function nextTrack(){
   if(!currentAlbum) return;
   const songs = albums[currentAlbum].songs;
@@ -728,7 +737,6 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
-
 
 
 
