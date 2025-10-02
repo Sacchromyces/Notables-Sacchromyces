@@ -602,21 +602,55 @@ async function playSong(index, albumName=null){
   updatePlaylistButtons();
   playBtn.innerHTML = "&#10074;&#10074;";
 
-  // Media Session metadata (use original HTTPS URL, not blob)
-  if ('mediaSession' in navigator) {
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: song.title,
-      artist: currentAlbum,
-      album: currentAlbum,
-      artwork: [{ src: 'https://sacchromyces.github.io/Albums/' + albums[currentAlbum].cover, sizes:'200x200', type:'image/jpeg'}]
-    });
+// Media Session metadata (use original HTTPS URL, not blob)
+if ('mediaSession' in navigator) {
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: song.title,
+    artist: currentAlbum,
+    album: currentAlbum,
+    artwork: [{ 
+      src: 'https://sacchromyces.github.io/Albums/' + albums[currentAlbum].cover, 
+      sizes: '200x200', 
+      type: 'image/jpeg'
+    }]
+  });
 
-    navigator.mediaSession.setActionHandler('play',  () => { player.play(); });
-    navigator.mediaSession.setActionHandler('pause', () => { player.pause(); });
-    navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
-    navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
+  // Set playback state
+  navigator.mediaSession.playbackState = player.paused ? "paused" : "playing";
+
+  // Action handlers
+  navigator.mediaSession.setActionHandler('play', () => {
+    player.play();
+    navigator.mediaSession.playbackState = "playing";
+  });
+  navigator.mediaSession.setActionHandler('pause', () => {
+    player.pause();
+    navigator.mediaSession.playbackState = "paused";
+  });
+  navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
+  navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
+
+  // Optional: periodically update position so lock screen progress bar is accurate
+  if ('setPositionState' in navigator.mediaSession) {
+    navigator.mediaSession.setPositionState({
+      duration: player.duration || 0,
+      playbackRate: player.playbackRate || 1,
+      position: player.currentTime || 0
+    });
   }
+
+  // Keep updating position while playing
+  player.addEventListener('timeupdate', () => {
+    if ('setPositionState' in navigator.mediaSession) {
+      navigator.mediaSession.setPositionState({
+        duration: player.duration || 0,
+        playbackRate: player.playbackRate || 1,
+        position: player.currentTime || 0
+      });
+    }
+  });
 }
+
 
 // --- Next/Prev ---
 function nextTrack(){
@@ -786,38 +820,6 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
